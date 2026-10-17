@@ -1,0 +1,1803 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>桜電設 見積・請求書管理</title><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet"><style id="app-style">
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --ink:#1B2430; --paper:#F2F5F3; --surface:#FFFFFF;
+    --sakura:#B0446A;
+    --sakura-fill:#A83D5E; --sakura-fill-dk:#7C2C44;
+    --ground:#2F6647; --caution:#9C6A12; --progress:#2E5A79; --navy:#1B2430;
+    --line:#DCE2DE; --muted:#667079; --danger:#B0382C;
+    --font-display:'Shippori Mincho',serif;
+    --font-body:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ink:#E9ECEC; --paper:#15191C; --surface:#1D2226;
+      --sakura:#EBA0B6;
+      --line:#2B3237; --muted:#96A0A6; --danger:#E07364;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E9ECEC; --paper:#15191C; --surface:#1D2226;
+    --sakura:#EBA0B6;
+    --line:#2B3237; --muted:#96A0A6; --danger:#E07364;
+  }
+  *,*::before,*::after{box-sizing:inherit;}
+  html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{height:100%;margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--font-body);margin:0;}
+  input,select,textarea,button{font-family:inherit;font-size:inherit;color:inherit;}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  input[type=number]{-moz-appearance:textfield;}
+  a{color:var(--sakura);}
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--sakura); outline-offset:2px;
+  }
+  @media (prefers-reduced-motion:reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+
+  .app-shell{min-height:100%;display:flex;}
+  .sidebar{
+    width:216px;flex:0 0 216px;background:var(--navy);color:#F2F5F3;
+    position:sticky;top:0;align-self:flex-start;min-height:100vh;
+    padding:22px 14px;display:flex;flex-direction:column;gap:4px;
+  }
+  .brand{font-family:var(--font-display);font-size:21px;font-weight:700;color:#fff;padding:2px 10px 22px;letter-spacing:.02em;}
+  .brand small{display:block;font-family:var(--font-body);font-size:11px;font-weight:400;color:#9CA6AC;margin-top:3px;letter-spacing:.04em;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;
+    color:#C7CDD1;text-decoration:none;font-size:14px;font-weight:500;cursor:pointer;border:none;background:none;text-align:left;width:100%;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav-item.active{background:var(--sakura-fill);color:#fff;}
+  .nav-icon{width:18px;text-align:center;font-size:15px;}
+  .sidebar-foot{margin-top:auto;padding:10px 12px;font-size:11.5px;color:#7C868C;line-height:1.5;}
+
+  .main{flex:1;min-width:0;padding:32px 40px 80px;max-width:1180px;}
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .page-title{font-size:22px;font-weight:700;}
+  .page-sub{color:var(--muted);font-size:13px;margin-top:4px;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:5px;border:1px solid transparent;
+    background:var(--sakura-fill);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap;
+  }
+  .btn:hover{background:var(--sakura-fill-dk);}
+  .btn.secondary{background:transparent;border-color:var(--line);color:var(--ink);font-weight:500;}
+  .btn.secondary:hover{border-color:var(--sakura);color:var(--sakura);}
+  .btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);font-weight:500;}
+  .btn.danger:hover{background:var(--danger);color:#fff;}
+  .btn.small{padding:6px 11px;font-size:12.5px;}
+  .btn-icon{border:1px solid var(--line);background:var(--surface);color:var(--muted);width:28px;height:28px;border-radius:4px;cursor:pointer;line-height:1;}
+  .btn-icon:hover{color:var(--danger);border-color:var(--danger);}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;}
+  .banner{background:var(--surface);border:1px solid var(--caution);border-left:4px solid var(--caution);border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px;}
+  .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;border-left:3px solid var(--line);}
+  .stat-card[data-nav-href]{cursor:pointer;}
+  .stat-card[data-nav-href]:hover{border-color:var(--sakura);}
+  .stat-card .n{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .stat-card .l{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .stat-card.accent{border-left-color:var(--sakura);}
+  .stat-card.accent .n{color:var(--sakura);}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+  .input, select.input, textarea.input{
+    padding:9px 11px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);width:100%;
+  }
+  .search-input{max-width:260px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .list-table th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--line);}
+  .list-table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  .list-table tbody tr{cursor:pointer;}
+  .list-table tr:hover td{background:rgba(168,61,94,.05);}
+  .list-table a.row-link{color:var(--ink);text-decoration:none;font-weight:500;}
+  .list-table a.row-link:hover{color:var(--sakura);}
+  .list-table td.truncate-cell{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .num-cell{text-align:right;font-variant-numeric:tabular-nums;}
+  .empty-state{padding:48px 20px;text-align:center;color:var(--muted);}
+  .empty-state .btn{margin-top:14px;}
+
+  .badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}
+  .badge-見積中{background:var(--caution);}
+  .badge-受注{background:var(--sakura-fill);}
+  .badge-施工中{background:var(--progress);}
+  .badge-請求済み{background:var(--navy);color:#fff;}
+  .badge-入金済み{background:var(--ground);}
+  .badge-請求前{background:var(--danger);}
+
+  .editor-grid{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:24px;align-items:start;}
+  @media (max-width:980px){ .editor-grid{grid-template-columns:1fr;} }
+  .editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+
+  .item-table{margin:6px 0 4px;}
+  .item-table th{font-size:11.5px;color:var(--muted);text-align:left;padding:0 6px 6px;font-weight:500;}
+  .item-table td{padding:4px 6px;vertical-align:top;}
+  .item-table input{padding:7px 8px;font-size:13px;}
+  .item-table .col-qty input, .item-table .col-price input{text-align:right;}
+  .item-table .col-name{width:auto;}
+  .item-table .col-qty{width:64px;} .item-table .col-unit{width:64px;} .item-table .col-price{width:100px;} .item-table .col-del{width:30px;}
+  .item-table tr[data-type="heading"] td{padding-top:10px;}
+  .item-heading-name{font-weight:700;background:rgba(168,61,94,.07);}
+
+  .paper-frame{position:sticky;top:20px;overflow:hidden;}
+  .doc-pages{width:210mm;transform-origin:top left;display:flex;flex-direction:column;gap:14px;}
+  .doc-page{background:#fff;color:#1B2430;border:1px solid var(--line);width:210mm;height:297mm;padding:15mm 15mm 14mm;font-family:var(--font-body);box-shadow:0 2px 10px rgba(0,0,0,.08);position:relative;overflow:hidden;}
+
+  .form-sec{font-size:13px;font-weight:700;color:var(--muted);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+  .form-sec:first-of-type{margin-top:6px;}
+  .tgl-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .tgl{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:13.5px;background:var(--surface);}
+  .tgl:has(input:checked){border-color:var(--sakura);color:var(--sakura);font-weight:700;}
+  .tgl input{accent-color:var(--sakura-fill);margin:0;}
+  .item-table .col-drag{width:22px;padding-left:0;padding-right:0;}
+  .drag-handle{display:inline-block;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted);font-size:14px;letter-spacing:-3px;padding:7px 4px;line-height:1;}
+  .drag-handle:hover{color:var(--sakura);}
+  .item-row.dragging td{background:rgba(168,61,94,.10);}
+  .item-row.dragging .drag-handle{cursor:grabbing;color:var(--sakura);}
+  body.is-dragging{user-select:none;-webkit-user-select:none;cursor:grabbing;}
+  .detail-section{margin-top:22px;}
+  .detail-section h3{font-size:14.5px;margin-bottom:10px;color:var(--muted);font-weight:700;}
+  .mini-list{border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .mini-list a{display:flex;justify-content:space-between;padding:11px 14px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);font-size:13.5px;}
+  .mini-list a:last-child{border-bottom:none;}
+  .mini-list a:hover{background:rgba(168,61,94,.06);}
+  .mini-list .mn{color:var(--muted);font-size:12px;}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:6px;font-size:13.5px;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:80;opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  .top-bar{display:none;}
+  @media (max-width:840px){
+    .app-shell{flex-direction:column;}
+    /* スマホ：メニューを画面下に固定し、6つを横いっぱいに均等に並べる（スクロール不要） */
+    .sidebar{
+      position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;flex:none;min-height:0;
+      display:grid;grid-template-columns:repeat(6,1fr);gap:0;align-items:stretch;
+      padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));
+      overflow:visible;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,.15);
+    }
+    .brand,.sidebar-foot{display:none;}
+    .nav-item{
+      flex-direction:column;justify-content:center;align-items:center;gap:2px;
+      width:auto;min-width:0;min-height:52px;padding:6px 2px;border-radius:8px;
+      font-size:11px;line-height:1.2;text-align:center;white-space:nowrap;
+    }
+    .nav-icon{width:auto;font-size:18px;line-height:1;}
+    .main{padding:22px 16px calc(96px + env(safe-area-inset-bottom,0px));}
+    .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px));}
+    /* 一覧表：文字が1文字ずつ折り返さないようにして、はみ出た分は横にスクロール */
+    [id^="doc-table-wrap"], #projects-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .list-table th, .list-table td{white-space:nowrap;}
+    .list-table td.truncate-cell{max-width:140px;}
+    .card{padding:14px;}
+    /* 明細入力：1行目に品名、2行目に数量・単位・単価の2段組みにする */
+    .item-table, .item-table tbody{display:block;width:100%;}
+    .item-table thead{display:none;}
+    .item-table tr.item-row{
+      display:grid;grid-template-columns:22px minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) 30px;
+      grid-template-areas:"drag name name name del" "drag qty unit price del";
+      column-gap:6px;row-gap:4px;align-items:end;padding:8px 0;border-bottom:1px solid var(--line);
+    }
+    .item-table tr[data-type="heading"]{grid-template-areas:"drag name name name del";align-items:center;}
+    .item-table td{display:block;padding:0 !important;width:auto !important;min-width:0;}
+    .item-table td.col-drag{grid-area:drag;align-self:center;}
+    .item-table td.col-name{grid-area:name;}
+    .item-table td.col-qty{grid-area:qty;}
+    .item-table td.col-unit{grid-area:unit;}
+    .item-table td.col-price{grid-area:price;}
+    .item-table td.col-del{grid-area:del;align-self:center;}
+    .item-table td.col-qty::before{content:"数量";}
+    .item-table td.col-unit::before{content:"単位";}
+    .item-table td.col-price::before{content:"単価";}
+    .item-table td.col-qty::before, .item-table td.col-unit::before, .item-table td.col-price::before{display:block;font-size:11px;color:var(--muted);margin-bottom:2px;}
+    .item-table input{width:100%;font-size:16px;}
+    .template-picker{margin:8px 0 0 !important;display:block !important;width:100% !important;}
+    .field-row{grid-template-columns:1fr;}
+  }
+
+  @media print{
+    body *{visibility:hidden;}
+    #print-target, #print-target *{visibility:visible;}
+    #print-target{position:absolute;left:0;top:0;width:210mm;gap:0;transform:none !important;}
+    #print-target .doc-page{border:none;box-shadow:none;break-after:page;page-break-after:always;}
+    #print-target .doc-page:last-child{break-after:auto;page-break-after:auto;}
+    .paper-frame{height:auto !important;overflow:visible;position:static;}
+    @page{ size:A4; margin:0; }
+  }
+</style></head><body><div class="app-shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">桜電設<small>見積・請求書管理</small></div>
+    <button class="nav-item" data-nav="home"><span class="nav-icon">◆</span>ホーム</button>
+    <button class="nav-item" data-nav="projects"><span class="nav-icon">▤</span>案件</button>
+    <button class="nav-item" data-nav="quotes"><span class="nav-icon">▥</span>見積書</button>
+    <button class="nav-item" data-nav="invoices"><span class="nav-icon">▦</span>請求書</button>
+    <button class="nav-item" data-nav="customers"><span class="nav-icon">☷</span>取引先</button>
+    <button class="nav-item" data-nav="settings"><span class="nav-icon">⚙</span>自社情報</button>
+    <div class="sidebar-foot">データはこのアプリ内に自動保存されます。</div>
+  </nav>
+  <main class="main" id="main">
+    <div class="empty-state">読み込み中…</div>
+  </main>
+</div><div class="toast" id="toast"></div><script>(function offlineShim(){
+  var dataEl = document.getElementById("sakura-data");
+  var src = dataEl ? JSON.parse(dataEl.textContent) : null;
+  var KEY = src ? "sakura-offline:" + src.exportedAt : "sakura-web:v1";
+  var store = null, meta = null, canSave = true;
+  try { var saved = localStorage.getItem(KEY); if(saved){ var o = JSON.parse(saved); store = o.docs; meta = o.meta || null; } } catch(e){ canSave = false; }
+  if(!store) store = src ? JSON.parse(JSON.stringify(src.docs)) : {};
+  if(!meta) meta = { exportedAt: src ? src.exportedAt : null };
+  window.SAKURA_OFFLINE = { exportedAt: meta.exportedAt, site: !src };
+  var listeners = [];
+  function clone(o){ return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
+  function persist(){ if(!canSave) return; try { localStorage.setItem(KEY, JSON.stringify({docs:store, meta:meta})); } catch(e){ canSave = false; } }
+  function newId(){ return "L" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function docSnap(path){ return { exists: Object.prototype.hasOwnProperty.call(store, path), id: path.split("/").pop(), data: function(){ return clone(store[path]); } }; }
+  function colSnap(q){
+    var pre = q.col + "/";
+    var list = Object.keys(store).filter(function(k){ return k.indexOf(pre)===0 && k.slice(pre.length).indexOf("/")===-1; })
+      .map(function(k){ return { id:k.slice(pre.length), _d:store[k] }; });
+    if(q.field){ list.sort(function(a,b){ var x=a._d[q.field]||0, y=b._d[q.field]||0; return q.dir==="desc" ? (y>x?1:y<x?-1:0) : (x>y?1:x<y?-1:0); }); }
+    if(q.lim) list = list.slice(0, q.lim);
+    return { docs: list.map(function(it){ return { id: it.id, data: function(){ return clone(it._d); } }; }) };
+  }
+  function changed(){ persist(); setTimeout(function(){ listeners.slice().forEach(function(l){ try { l.cb(l.q ? colSnap(l.q) : docSnap(l.path)); } catch(e){} }); }, 0); }
+  function listen(entry){ listeners.push(entry); setTimeout(function(){ entry.cb(entry.q ? colSnap(entry.q) : docSnap(entry.path)); }, 0); return function(){ var i = listeners.indexOf(entry); if(i>-1) listeners.splice(i,1); }; }
+  function docRef(path){ return {
+    id: path.split("/").pop(),
+    get: function(){ return Promise.resolve(docSnap(path)); },
+    set: function(d){ store[path] = clone(d); changed(); return Promise.resolve(); },
+    update: function(d){ store[path] = Object.assign({}, store[path] || {}, clone(d)); changed(); return Promise.resolve(); },
+    delete: function(){ delete store[path]; changed(); return Promise.resolve(); },
+    onSnapshot: function(cb){ return listen({ path:path, cb:cb }); }
+  }; }
+  function query(q){ return {
+    orderBy: function(f, dir){ return query(Object.assign({}, q, { field:f, dir:dir||"asc" })); },
+    limit: function(n){ return query(Object.assign({}, q, { lim:n })); },
+    get: function(){ return Promise.resolve(colSnap(q)); },
+    onSnapshot: function(cb){ return listen({ q:q, cb:cb }); }
+  }; }
+  var db = {
+    doc: function(path){ return docRef(path); },
+    collection: function(col){ var base = query({ col:col }); base.add = function(d){ var id = newId(); store[col+"/"+id] = clone(d); changed(); return Promise.resolve(docRef(col+"/"+id)); }; base.doc = function(id){ return docRef(col+"/"+(id||newId())); }; return base; }
+  };
+  var downloads = { save: function(opt){
+    var url = URL.createObjectURL(opt.data);
+    var a = document.createElement("a"); a.href = url; a.download = opt.filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    return Promise.resolve({ status:"saved" });
+  } };
+  window.claude = { use: function(name){ return Promise.resolve(name==="db" ? db : name==="downloads" ? downloads : null); } };
+  function hasDocs(){ return Object.keys(store).some(function(k){ return /^(projects|quotes|invoices|customers)\//.test(k); }); }
+  function parseBackup(text){
+    text = String(text||"").trim();
+    var obj;
+    if(text.charAt(0) === "{") obj = JSON.parse(text);
+    else {
+      var m = text.match(/<script type="application\/json" id="sakura-data">([\s\S]*?)<\/script>/);
+      if(!m) throw new Error("no data");
+      obj = JSON.parse(m[1]);
+    }
+    if(!obj || obj.format !== "sakura-densetsu-backup" || !obj.docs) throw new Error("bad format");
+    return obj;
+  }
+  function fmtStamp(iso){ if(!iso) return ""; var d = new Date(iso); return d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日 "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); }
+  var bar = null;
+  function drawBar(){
+    if(!bar) return;
+    var msg;
+    if(!hasDocs() && !meta.exportedAt) msg = "データがまだ入っていません。右のボタンからバックアップファイルを読み込んでください。";
+    else msg = "Claudeなし版（" + fmtStamp(meta.exportedAt) + " 時点のバックアップ）。ここでの変更は、この端末のこのブラウザの中にだけ保存されます。";
+    if(!canSave) msg += "※この環境では保存できないため、閉じると変更は消えます。";
+    bar.innerHTML = "";
+    var t = document.createElement("span"); t.textContent = msg; bar.appendChild(t);
+    var lb = document.createElement("label");
+    lb.textContent = "バックアップを読み込む";
+    lb.style.cssText = "display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:#fff;color:#7A520C;font-weight:700;cursor:pointer;white-space:nowrap;";
+    var inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".html,.htm,.json,text/html,application/json"; inp.style.display = "none";
+    inp.addEventListener("change", function(){ if(inp.files && inp.files[0]) importFile(inp.files[0]); inp.value = ""; });
+    lb.appendChild(inp); bar.appendChild(lb);
+  }
+  function importFile(file){
+    var r = new FileReader();
+    r.onload = function(){
+      var obj;
+      try { obj = parseBackup(r.result); }
+      catch(e){ alert("バックアップファイルとして読み込めませんでした。「桜電設_バックアップ_〜.html」のファイルを選んでください。"); return; }
+      if(hasDocs() && !confirm("今この端末に入っているデータを、" + fmtStamp(obj.exportedAt) + " 時点のバックアップで置き換えます。よろしいですか？")) return;
+      store = JSON.parse(JSON.stringify(obj.docs));
+      meta = { exportedAt: obj.exportedAt };
+      window.SAKURA_OFFLINE.exportedAt = obj.exportedAt;
+      changed(); drawBar();
+      location.hash = "#/home";
+      setTimeout(function(){ alert("読み込みました（" + fmtStamp(obj.exportedAt) + " 時点のデータ）"); }, 50);
+    };
+    r.onerror = function(){ alert("ファイルを読み込めませんでした"); };
+    r.readAsText(file);
+  }
+  document.addEventListener("DOMContentLoaded", function(){
+    bar = document.createElement("div");
+    bar.style.cssText = "position:sticky;top:0;z-index:60;background:#9C6A12;color:#fff;font-size:12.5px;line-height:1.6;padding:8px 14px;text-align:center;";
+    document.body.insertBefore(bar, document.body.firstChild);
+    drawBar();
+  });
+})();</script><script id="app-script">
+(function(){
+"use strict";
+var SHELL_HTML = (document.querySelector(".app-shell")||{}).outerHTML || "";
+
+var DOC_CSS = ".doc-page{container-type:inline-size;color:#111;font-size:12px;line-height:1.55;display:flex;flex-direction:column;box-sizing:border-box;}\n.doc-page *{box-sizing:border-box;}\n.d-pageno{position:absolute;left:0;right:0;bottom:6mm;text-align:center;font-size:10.5px;color:#444;letter-spacing:.1em;font-variant-numeric:tabular-nums;}\n.d-cont{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:12px;font-size:11.5px;}\n.d-cont .t{font-size:15px;font-weight:700;letter-spacing:.2em;}\n.d-notes{min-height:60px;}\n.measuring .d-notes{flex:none !important;}\n.fit{white-space:nowrap;overflow:hidden;min-width:0;}\n.fit.fit-wrap{white-space:normal;overflow:visible;overflow-wrap:anywhere;}\n.d-items,.d-bank{table-layout:fixed;}\n.d-meta td.k{padding-right:2.5em;white-space:nowrap;}\n.d-title{text-align:center;font-size:25px;font-weight:500;letter-spacing:.3em;padding-left:.3em;margin:0 0 24px;}\n.d-grid{display:grid;grid-template-columns:minmax(0,1fr) fit-content(39%);column-gap:3%;row-gap:14px;margin-bottom:22px;}\n.d-grid{align-items:start;}\n.d-leftcol{min-width:0;}\n.d-right{min-width:0;}\n.d-right .d-issuer{margin-top:20px;}\n.d-lowleft{min-width:0;margin-top:32px;}\n.d-subject{margin-bottom:0 !important;}\n.d-amt{margin-top:8px;}\n.d-client-name{width:fit-content;max-width:100%;padding-right:.3em;font-size:24px;font-weight:800;letter-spacing:.02em;border-bottom:2px solid #111;padding-bottom:2px;margin-bottom:3px;}\n.d-hon{margin-left:.8em;}\n.d-attn{font-size:16px !important;font-weight:700 !important;margin-top:4px;}\n.d-client > div:not(.d-client-name){font-size:13.5px;font-weight:600;line-height:1.45;}\n.d-client .d-rep{margin-top:4px;font-size:11.5px !important;}\n.d-meta{width:auto;border-collapse:collapse;font-size:12.5px;}\n.d-meta td{padding:2px 0;font-variant-numeric:tabular-nums;}\n.d-meta td.v{text-align:right;font-weight:700;}\n.d-issuer{font-size:12px;line-height:1.7;}\n.d-iss-row{display:grid;grid-template-columns:3.4em 1em minmax(0,1fr);}\n.d-iss-row .l{text-align:justify;text-align-last:justify;white-space:nowrap;}\n.d-iss-row .v{font-weight:600;}\n.d-issuer-name{font-size:17px;font-weight:700;margin-bottom:3px;}\n.d-lead{margin:0 0 8px;font-size:12.5px;font-weight:600;}\n.d-subject{display:grid;grid-template-columns:4.5em 1fr;align-items:baseline;font-size:18px;margin-bottom:8px;}\n.d-subject > span{font-weight:800;}\n.d-amount{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1.5px solid #111;padding:2px 2px 3px;}\n.d-amount .k{font-size:13px;font-weight:700;}\n.d-amount .v{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;}\n.d-box{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px;}\n.d-box th{border:1px solid #111;background:#111;color:#fff;font-weight:700;padding:3px 6px;text-align:center;}\n.d-box td{border:1px solid #111;padding:3px 8px;font-variant-numeric:tabular-nums;font-weight:700;}\n.d-box td.num{text-align:right;white-space:nowrap;}\n.d-box td.big{font-size:19px;font-weight:700;}\n.d-box td.pay{font-size:11.5px;line-height:1.5;font-weight:600;}\n.d-pay{table-layout:fixed;}\n.d-valid th{background:#E3E3E3;color:#111;}\n.d-bankr{width:100%;margin-top:8px;table-layout:fixed;}\n.d-bankr th{background:#E3E3E3;color:#111;font-size:11px;padding:2px 6px;}\n.d-bankr td{padding:1px 6px;vertical-align:middle;}\n.d-bankr td.bk-k{background:#F4F4F4;font-size:9.5px;font-weight:500;color:#333;white-space:nowrap;}\n.bk-v{font-size:11.5px;font-weight:700;letter-spacing:.02em;}\n.d-pay th{background:#E3E3E3;color:#111;vertical-align:middle;}\n.d-items-wrap{overflow-x:auto;}\n.d-items{width:100%;border-collapse:collapse;font-size:11.5px;}\n.d-items th{background:#111;color:#fff;font-weight:500;padding:4px 6px;border:1px solid #111;text-align:center;white-space:nowrap;}\n.d-items td{padding:2px 6px;border:1px solid #444;height:2.05em;line-height:1.35;}\n.d-items tbody tr.z td{background:#F0F0F0;}\n.d-items tr.d-gap td{background:#fff !important;}\n.d-items td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}\n.d-items td.c{text-align:center;white-space:nowrap;}\n.d-items tr.d-sec td{background:#C9C9C9 !important;font-weight:700;border-top:1.5px solid #111;}\n.d-items tr.d-sec td.num{color:#444;font-size:10.5px;}\n.d-bottom{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-top:16px;}\n.d-bank{border-collapse:collapse;font-size:11px;width:46%;}\n.d-bank th{background:#111;color:#fff;font-weight:500;padding:3px 6px;border:1px solid #111;text-align:left;}\n.d-bank td{border:1px solid #111;padding:3px 6px;}\n.d-bank td.k{background:#EBEBEB;white-space:nowrap;width:6em;font-weight:500;}\n.d-right .d-bank{width:100%;margin-top:8px;font-size:11px;}\n.d-right .d-bank th{background:#E3E3E3;color:#111;font-weight:700;border:1px solid #111;}\n.d-right .d-bank td.k{background:#F4F4F4;}\n.d-bl{font-size:11.5px;line-height:2;padding-top:20px;}\n.d-bl span.k{display:inline-block;width:5em;}\n.d-sum{border-collapse:collapse;font-size:14px;border:2px solid #111;width:44%;margin-left:auto;}\n.d-sum td{border:1px solid #111;padding:4px 10px;font-variant-numeric:tabular-nums;}\n.d-sum td.num{text-align:right;white-space:nowrap;}\n.d-sum tr.g td{font-weight:700;font-size:16px;}\n.d-sum tr.g td:first-child{background:#111;color:#fff;}\n.d-sum td.k{white-space:nowrap;}\n.d-bd{display:grid;grid-template-columns:auto 1fr auto;column-gap:14px;align-items:baseline;}\n.d-bd > span:nth-child(1),.d-bd > span:nth-child(2){font-weight:700;}\n.d-bd > span:nth-child(3){font-weight:700;font-size:16px;}\n.d-bd .sub{font-size:12px;font-weight:700 !important;color:#333;}\n.d-notes{margin-top:16px;border:1px solid #111;flex:1 0 60px;padding:5px 10px;}\n.d-notes .k{font-size:11.5px;padding-left:.5em;margin-bottom:2px;}\n.d-notes .b{font-size:11.5px;}\n@container (max-width:540px){\n  .doc-preview{font-size:10px;}\n  .d-title{font-size:19px;margin-bottom:16px;}\n  .d-grid{column-gap:4%;grid-template-columns:minmax(0,1fr) 36%;}\n  .d-client-name{font-size:20px;}\n  .d-client > div:not(.d-client-name){font-size:11px;}\n  .d-issuer{font-size:10px;}\n  .d-issuer-name{font-size:12.5px;}\n  .d-subject{font-size:15px;grid-template-columns:4em 1fr;}\n  .d-amount .v{font-size:16px;}\n  .d-box td.big{font-size:13px;}\n  .d-items,.d-box,.d-sum,.d-meta,.d-bl{font-size:10px;}\n  .d-items td,.d-items th{padding:2px 4px;}\n  .d-sum{width:54%;font-size:12px;}\n  .d-bank{font-size:9.5px;width:44%;}\n}\n@container (max-width:380px){\n  .d-grid{grid-template-columns:1fr;row-gap:14px;}\n  .d-bottom{flex-direction:column-reverse;align-items:stretch;}\n  .d-sum{width:100%;}\n  .d-bank{width:100%;}\n  .d-amount{max-width:none;}\n}";
+(function(){ var st=document.createElement('style'); st.id='doc-css'; st.textContent=DOC_CSS; document.head.appendChild(st); })();
+/* ---------- state ---------- */
+var STATE = { projects: [], quotes: [], invoices: [], customers: [], settings: null, ready: false };
+var db = null;
+var STATUSES = ["見積中","受注","施工中","請求前","請求済み","入金済み"];
+var TEMPLATE_NAMES = ["材料費","労務費","諸経費","廃材処分費","養生費","交通費・出張費","駐車場代"];
+
+/* ---------- helpers ---------- */
+function esc(s){ return (s===null||s===undefined?"":String(s)).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function yen(n){ n = Math.round(Number(n)||0); return "¥" + n.toLocaleString("ja-JP"); }
+function todayStr(){ var d=new Date(); var local=new Date(d.getTime()-d.getTimezoneOffset()*60000); return local.toISOString().slice(0,10); }
+function addDaysStr(dateStr,n){ if(!dateStr) return ""; var parts=dateStr.split("-").map(Number); var d=new Date(parts[0],parts[1]-1,parts[2]); d.setDate(d.getDate()+Number(n||0)); var local=new Date(d.getTime()-d.getTimezoneOffset()*60000); return local.toISOString().slice(0,10); }
+function fmtDate(s){ if(!s) return "未設定"; var p=s.split("-"); if(p.length!==3) return s; return p[0]+"年"+parseInt(p[1],10)+"月"+parseInt(p[2],10)+"日"; }
+function fmtDateShort(s){ if(!s) return "-"; var p=s.split("-"); if(p.length!==3) return s; return p[1]+"/"+p[2]; }
+function firstLine(s){ return (s||"").split("\n")[0]; }
+function qs(sel,scope){ return (scope||document).querySelector(sel); }
+function qsa(sel,scope){ return Array.prototype.slice.call((scope||document).querySelectorAll(sel)); }
+function toast(msg){ var t=qs("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._h); toast._h=setTimeout(function(){t.classList.remove("show");},2400); }
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+function parseHash(){
+  var h = location.hash.replace(/^#\/?/,"");
+  var qIndex = h.indexOf("?");
+  var query = {};
+  if(qIndex>-1){ var qs2=h.slice(qIndex+1); h=h.slice(0,qIndex); qs2.split("&").forEach(function(p){ if(!p)return; var kv=p.split("="); query[decodeURIComponent(kv[0])]=decodeURIComponent(kv[1]||""); }); }
+  var parts = h.split("/").filter(Boolean);
+  return { section: parts[0]||"home", id: parts[1]||null, query: query };
+}
+function go(hash){ location.hash = hash; }
+
+/* ---------- db bootstrap ---------- */
+var DEFAULT_SETTINGS = {
+  companyName:"桜電設", repName:"", postalCode:"", address:"", phone:"", email:"",
+  invoiceRegNumber:"", quoteValidDays:30, invoiceDueDays:30,
+  bankName:"", branchName:"", accountType:"普通", accountNumber:"", accountHolder:"",
+  quoteSeq:0, invoiceSeq:0, laborRate:34300
+};
+
+function waitForClaudeBridge(cb, attempts){
+  attempts = attempts||0;
+  if(window.claude && window.claude.use){ cb(); return; }
+  if(attempts>60){ renderFatal("このページはClaude.ai上でのみ動作します。"); return; }
+  setTimeout(function(){ waitForClaudeBridge(cb, attempts+1); }, 50);
+}
+
+function initApp(){
+  waitForClaudeBridge(function(){
+    claude.use("db").then(function(namespace){
+      db = namespace;
+      if(!db){ renderFatal("データ保存機能を利用できませんでした。ページを再読み込みしてください。"); return; }
+      ensureSettings().then(subscribeAll);
+    }).catch(function(){ renderFatal("初期化に失敗しました。ページを再読み込みしてください。"); });
+  });
+}
+
+function ensureSettings(){
+  var ref = db.doc("settings/company");
+  return ref.get().then(function(snap){
+    if(!snap.exists){ return ref.set(DEFAULT_SETTINGS); }
+  }).catch(function(){});
+}
+
+function subscribeAll(){
+  db.doc("settings/company").onSnapshot(function(snap){
+    STATE.settings = snap.exists ? Object.assign({}, DEFAULT_SETTINGS, snap.data()) : Object.assign({},DEFAULT_SETTINGS);
+    onDataChanged();
+  }, function(){ /* keep last known */ });
+
+  db.collection("projects").orderBy("updatedAt","desc").limit(1000).onSnapshot(function(qs2){
+    STATE.projects = qs2.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    STATE.ready = true;
+    onDataChanged();
+  }, function(){ toast("案件データの取得でエラーが発生しました"); });
+
+  db.collection("customers").orderBy("updatedAt","desc").limit(1000).onSnapshot(function(qs2){
+    STATE.customers = qs2.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    onDataChanged();
+  }, function(){ toast("取引先データの取得でエラーが発生しました"); });
+
+  db.collection("quotes").orderBy("updatedAt","desc").limit(1000).onSnapshot(function(qs2){
+    STATE.quotes = qs2.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    onDataChanged();
+  }, function(){ toast("見積書データの取得でエラーが発生しました"); });
+
+  db.collection("invoices").orderBy("updatedAt","desc").limit(1000).onSnapshot(function(qs2){
+    STATE.invoices = qs2.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    onDataChanged();
+  }, function(){ toast("請求書データの取得でエラーが発生しました"); });
+}
+
+var EDITOR_SECTIONS = {"projects-edit":1,"quotes-edit":1,"invoices-edit":1,"customers-edit":1};
+function onDataChanged(){
+  if(!STATE.ready) return;
+  var cur = currentRoute;
+  if(cur && EDITOR_SECTIONS[cur.key]) return; /* don't clobber an open editor */
+  render();
+}
+
+function renderFatal(msg){
+  qs("#main").innerHTML = '<div class="empty-state">'+esc(msg)+'</div>';
+}
+
+/* ---------- numbering ---------- */
+function nextNumber(kind){
+  var field = kind==="quote" ? "quoteSeq" : "invoiceSeq";
+  var prefix = kind==="quote" ? "EST-" : "INV-";
+  var ref = db.doc("settings/company");
+  return ref.get().then(function(snap){
+    var data = snap.exists ? snap.data() : {};
+    var next = (Number(data[field])||0) + 1;
+    return ref.update(byField(field,next)).then(function(){ return prefix + String(next).padStart(4,"0"); });
+  });
+}
+function byField(f,v){ var o={}; o[f]=v; return o; }
+
+/* ---------- generic writes ---------- */
+function saveDoc(collection,id,data){
+  data.updatedAt = Date.now();
+  var arr = STATE[collection];
+  if(id){
+    return db.doc(collection+"/"+id).update(data).then(function(){
+      mergeIntoState(arr, id, data);
+      return id;
+    });
+  }
+  data.createdAt = Date.now();
+  return db.collection(collection).add(data).then(function(ref){
+    mergeIntoState(arr, ref.id, data);
+    return ref.id;
+  });
+}
+function mergeIntoState(arr, id, data){
+  if(!arr) return;
+  for(var i=0;i<arr.length;i++){
+    if(arr[i].id===id){ arr[i] = Object.assign({}, arr[i], data, {id:id}); return; }
+  }
+  arr.unshift(Object.assign({id:id}, data));
+}
+function deleteDoc(collection,id){ return db.doc(collection+"/"+id).delete(); }
+
+/* ---------- router / render ---------- */
+var currentRoute = null;
+
+function render(){
+  var r = parseHash();
+  var section = r.section, id = r.id, query = r.query;
+  qsa(".nav-item").forEach(function(b){ b.classList.toggle("active", b.dataset.nav===section); });
+  var main = qs("#main");
+  var key = section;
+  if((section==="projects"||section==="quotes"||section==="invoices"||section==="customers") && id) key = section+"-edit";
+  currentRoute = {section:section,id:id,query:query,key:key};
+
+  if(!STATE.ready){ main.innerHTML = '<div class="empty-state">読み込み中…</div>'; return; }
+
+  if(section==="home") main.innerHTML = renderHome();
+  else if(section==="projects" && !id) main.innerHTML = renderProjectsList(query);
+  else if(section==="projects" && id) main.innerHTML = renderProjectForm(id==="new"?null:findById(STATE.projects,id));
+  else if(section==="quotes" && !id) main.innerHTML = renderDocList("quote");
+  else if(section==="quotes" && id) { main.innerHTML = renderDocEditor("quote", id==="new"?null:findById(STATE.quotes,id), query); afterEditorMount("quote"); }
+  else if(section==="invoices" && !id) main.innerHTML = renderDocList("invoice");
+  else if(section==="invoices" && id) { main.innerHTML = renderDocEditor("invoice", id==="new"?null:findById(STATE.invoices,id), query); afterEditorMount("invoice"); }
+  else if(section==="settings") main.innerHTML = renderSettings();
+  else if(section==="customers" && !id) main.innerHTML = renderCustomersList();
+  else if(section==="customers" && id) main.innerHTML = renderCustomerForm(id==="new"?null:findById(STATE.customers,id));
+  else main.innerHTML = '<div class="empty-state">ページが見つかりません</div>';
+
+  if(section==="projects" && !id) filterProjects();
+  if(section==="quotes" && !id) filterDocs("quote");
+  if(section==="invoices" && !id) filterDocs("invoice");
+}
+window.addEventListener("hashchange", render);
+
+function findById(arr,id){ for(var i=0;i<arr.length;i++){ if(arr[i].id===id) return arr[i]; } return null; }
+function latestQuoteFor(projectId){ for(var i=0;i<STATE.quotes.length;i++){ if(STATE.quotes[i].projectId===projectId) return STATE.quotes[i]; } return null; }
+function projectRowHref(p){
+  if(false){
+    var q = latestQuoteFor(p.id);
+    return q ? "#/quotes/"+q.id : "#/quotes/new?project="+p.id;
+  }
+  return "#/projects/"+p.id;
+}
+
+/* ---------- home ---------- */
+function renderHome(){
+  var counts = {}; STATUSES.forEach(function(s){counts[s]=0;});
+  STATE.projects.forEach(function(p){ if(counts[p.status]===undefined) counts[p.status]=0; counts[p.status]++; });
+  var unpaidTotal = 0;
+  STATE.invoices.forEach(function(inv){
+    var proj = findById(STATE.projects, inv.projectId);
+    if(proj && proj.status==="請求済み"){ unpaidTotal += docTotal(inv.items); }
+  });
+  var companyReady = STATE.settings && STATE.settings.address;
+  var lastBk = STATE.settings && STATE.settings.lastBackupAt;
+  var bkOld = !lastBk || (Date.now() - lastBk) > 30*24*60*60*1000;
+  var bkBanner = (bkOld && !window.SAKURA_OFFLINE) ? '<div class="banner"><span>'+(lastBk ? '最後のバックアップから30日以上たっています。' : 'まだバックアップがありません。')+'万一に備えて、非常用アプリとしてバックアップしておきましょう。</span><button class="btn small" data-action="backup">今すぐバックアップ</button></div>' : '';
+  var banner = bkBanner + (companyReady ? "" : '<div class="banner"><span>自社情報（住所・インボイス登録番号など）が未設定です。見積書・請求書に反映されます。</span><button class="btn small" data-nav="settings">自社情報を入力</button></div>');
+
+  var pendingInv = STATE.invoices.filter(function(inv){
+    if(inv.exportedAt) return false;
+    var pr = findById(STATE.projects, inv.projectId);
+    return !(pr && pr.status==="入金済み");
+  });
+  var pendingHtml = pendingInv.length ? '<div class="detail-section"><h3>請求前（まだ書き出していない請求書）</h3><div class="mini-list">' + pendingInv.map(function(inv){
+    var pr = findById(STATE.projects, inv.projectId);
+    return '<a href="#/invoices/'+inv.id+'"><span>'+esc(inv.number||"(番号なし)")+' '+esc(pr?(firstLine(pr.workContent)||pr.siteName||""):"")+' <span class="mn">'+esc(pr?pr.customerName:"")+'</span></span><span class="mn">'+yen(docTotal(inv.items))+'</span></a>';
+  }).join("") + '</div></div>' : '';
+
+  var recent = STATE.projects.slice(0,6);
+  var recentHtml = recent.length ? '<div style="overflow-x:auto;"><table class="list-table"><thead><tr><th>件名</th><th>顧客名</th><th>ステータス</th><th>更新日</th></tr></thead><tbody>' + recent.map(function(p){
+    var href = "#/projects/"+p.id;
+    return '<tr data-href="'+href+'"><td><a class="row-link" href="'+href+'">'+esc(firstLine(p.workContent)||p.siteName||"(件名未設定)")+'</a></td>'
+      + '<td>'+esc(p.customerName||"-")+'</td>'
+      + '<td>'+statusBadge(p.status)+'</td>'
+      + '<td>'+fmtDateShort(new Date(p.updatedAt||p.createdAt||Date.now()).toISOString().slice(0,10))+'</td></tr>';
+  }).join("") + '</tbody></table></div>' : '<div class="empty-state">まだ案件がありません。<div><button class="btn" data-nav-href="#/projects/new">+ 新規案件を登録</button></div></div>';
+
+  return ''
+  + banner
+  + '<div class="page-head"><div><div class="page-title">ホーム</div><div class="page-sub">桜電設の見積・請求のいまが一目でわかります</div></div>'
+  + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn secondary" data-nav-href="#/projects/new">+ 新規案件</button><button class="btn" data-nav-href="#/quotes/new">+ 新規見積書</button><button class="btn" data-nav-href="#/invoices/new">+ 新規請求書</button></div></div>'
+  + '<div class="stat-grid">'
+    + statCard(counts["見積中"],"見積中","caution","#/projects?status="+encodeURIComponent("見積中"))
+    + statCard(counts["受注"],"受注","sakura","#/projects?status="+encodeURIComponent("受注"))
+    + statCard(counts["施工中"],"施工中","progress","#/projects?status="+encodeURIComponent("施工中"))
+    + statCard(counts["請求前"],"請求前（未書き出し）","danger","#/projects?status="+encodeURIComponent("請求前"))
+    + statCard(counts["請求済み"],"請求済み（未入金）","navy","#/projects?status="+encodeURIComponent("請求済み"))
+    + '<div class="stat-card accent" data-nav-href="#/projects?status='+encodeURIComponent("請求済み")+'"><div class="n">'+yen(unpaidTotal)+'</div><div class="l">未入金の請求額合計</div></div>'
+  + '</div>'
+  + pendingHtml
+  + '<div class="detail-section"><h3>最近の案件</h3>'+recentHtml+'</div>';
+}
+function statCard(n,label,color,href){
+  return '<div class="stat-card"'+(href?' data-nav-href="'+href+'"':'')+' style="border-left-color:var(--'+color+')"><div class="n">'+(n||0)+'</div><div class="l">'+esc(label)+'</div></div>';
+}
+function statusBadge(status){ return '<span class="badge badge-'+esc(status||"見積中")+'">'+esc(status||"見積中")+'</span>'; }
+function docTotal(items){ var sub=(items||[]).reduce(function(s,it){ if(it && it.type==="heading") return s; return s+(Number(it.qty)||0)*(Number(it.price)||0);},0); return sub + Math.round(sub*0.1); }
+
+/* ---------- projects list ---------- */
+function renderProjectsList(query){
+  var initialStatus = (query && query.status) || "";
+  return ''
+  + '<div class="page-head"><div><div class="page-title">案件</div><div class="page-sub">顧客・現場ごとの案件を管理します</div></div><button class="btn" data-nav-href="#/projects/new">+ 新規案件</button></div>'
+  + '<div class="toolbar">'
+    + '<input class="input search-input" id="project-search" placeholder="件名・顧客名・担当者で検索">'
+    + '<select class="input" id="project-status-filter" style="width:auto;"><option value="">すべてのステータス</option>'+STATUSES.map(function(s){return '<option value="'+s+'"'+(s===initialStatus?" selected":"")+'>'+s+'</option>';}).join("")+'</select>'
+  + '</div>'
+  + '<div id="projects-table-wrap"></div>';
+}
+function filterProjects(){
+  var term = (qs("#project-search")&&qs("#project-search").value||"").trim().toLowerCase();
+  var statusF = qs("#project-status-filter")&&qs("#project-status-filter").value||"";
+  var list = STATE.projects.filter(function(p){
+    var hay = [p.workContent,p.siteName,p.customerName,p.contactPerson,p.address].join(" ").toLowerCase();
+    var matchTerm = !term || hay.indexOf(term)>-1;
+    var matchStatus = !statusF || p.status===statusF;
+    return matchTerm && matchStatus;
+  });
+  var wrap = qs("#projects-table-wrap");
+  if(!wrap) return;
+  if(!list.length){ wrap.innerHTML = '<div class="empty-state">該当する案件がありません。</div>'; return; }
+  wrap.innerHTML = '<table class="list-table"><thead><tr><th>件名</th><th>顧客名</th><th>ステータス</th><th>更新日</th></tr></thead><tbody>'
+    + list.map(function(p){
+      var href = projectRowHref(p);
+      return '<tr data-href="'+href+'"><td><a class="row-link" href="'+href+'">'+esc(firstLine(p.workContent)||p.siteName||"(件名未設定)")+'</a></td>'
+      + '<td>'+esc(p.customerName||"-")+'</td>'
+      + '<td>'+statusBadge(p.status)+'</td>'
+      + '<td>'+fmtDateShort(new Date(p.updatedAt||p.createdAt||Date.now()).toISOString().slice(0,10))+'</td></tr>';
+    }).join("") + '</tbody></table>';
+}
+
+/* ---------- customers (取引先) ---------- */
+function customerLabel(c){ return (c.name||"(名称未設定)"); }
+function renderCustomersList(){
+  var list = STATE.customers.slice().sort(function(a,b){ return String(a.name||"").localeCompare(String(b.name||""),"ja"); });
+  var body = list.length ? '<div style="overflow-x:auto;"><table class="list-table"><thead><tr><th>取引先名</th><th>担当者</th><th>電話</th><th>住所</th></tr></thead><tbody>'
+    + list.map(function(c){
+      var href = "#/customers/"+c.id;
+      return '<tr data-href="'+href+'"><td><a class="row-link" href="'+href+'">'+esc(customerLabel(c))+' '+esc(c.honorific||"")+'</a></td>'
+        + '<td>'+esc(c.contactPerson||"-")+'</td><td>'+esc(c.phone||"-")+'</td>'
+        + '<td class="truncate-cell" title="'+escAttr(c.address||"")+'">'+esc(c.address||"-")+'</td></tr>';
+    }).join("") + '</tbody></table></div>'
+    : '<div class="empty-state">よく取引する会社やお客さんを登録しておくと、案件を作るときに選ぶだけで宛名・住所が入ります。<div><button class="btn" data-nav-href="#/customers/new">+ 取引先を登録</button></div></div>';
+  return ''
+  + '<div class="page-head"><div><div class="page-title">取引先</div><div class="page-sub">よく取引する会社・お客さんの情報</div></div>'
+  + '<button class="btn" data-nav-href="#/customers/new">+ 新規取引先</button></div>'
+  + '<div class="card" style="padding:0;">'+body+'</div>';
+}
+function renderCustomerForm(c){
+  var isNew = !c;
+  var d = c || {name:"",honorific:"御中",postalCode:"",address:"",contactPerson:"",phone:"",email:"",memo:""};
+  var used = !isNew ? STATE.projects.filter(function(p){ return p.customerId===d.id; }) : [];
+  return ''
+  + '<div class="page-head"><div><div class="page-title">'+(isNew?"新規取引先":esc(customerLabel(d)))+'</div><div class="page-sub">'+(isNew?"よく取引する相手を登録します":"取引先の情報を編集します")+'</div></div>'
+  + (isNew?"":'<button class="btn danger small" data-action="delete-customer" data-id="'+d.id+'">この取引先を削除</button>')
+  + '</div>'
+  + '<form class="card" id="customer-form" data-id="'+(isNew?"":d.id)+'">'
+    + '<div class="field-row">'
+      + '<div class="field"><label>取引先名（会社名・お名前）</label><input class="input" id="cust-name" name="name" value="'+escAttr(d.name)+'" placeholder="例：株式会社〇〇"></div>'
+      + '<div class="field"><label>敬称</label><select class="input" id="cust-honorific" name="honorific"><option value="御中"'+(d.honorific!=="様"?" selected":"")+'>御中（会社あて）</option><option value="様"'+(d.honorific==="様"?" selected":"")+'>様（個人あて）</option></select></div>'
+    + '</div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>郵便番号</label><input class="input" id="cust-postal" name="postalCode" value="'+escAttr(d.postalCode)+'" placeholder="123-4567"></div>'
+      + '<div class="field"><label>電話番号</label><input class="input" id="cust-phone" name="phone" value="'+escAttr(d.phone)+'"></div>'
+    + '</div>'
+    + '<div class="field"><label>住所</label><input class="input" id="cust-address" name="address" value="'+escAttr(d.address)+'"></div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>担当者名</label><input class="input" id="cust-contact" name="contactPerson" value="'+escAttr(d.contactPerson)+'"></div>'
+      + '<div class="field"><label>メールアドレス</label><input class="input" type="email" id="cust-email" name="email" value="'+escAttr(d.email)+'"></div>'
+    + '</div>'
+    + '<div class="field"><label>メモ</label><textarea class="input" id="cust-memo" name="memo" rows="2">'+esc(d.memo)+'</textarea></div>'
+    + '<div class="editor-actions"><button type="submit" class="btn">保存する</button><button type="button" class="btn secondary" data-nav-href="#/customers">一覧に戻る</button>'
+    + (isNew?"":'<button type="button" class="btn secondary" data-nav-href="#/projects/new?customer='+d.id+'">+ この取引先で案件を作成</button>')+'</div>'
+  + '</form>'
+  + (!isNew ? '<div class="detail-section"><h3>この取引先の案件</h3>'+(used.length?'<div class="mini-list">'+used.map(function(p){return '<a href="#/projects/'+p.id+'"><span>'+esc(firstLine(p.workContent)||p.siteName||"(件名未設定)")+'</span>'+statusBadge(p.status)+'</a>';}).join("")+'</div>':'<div class="page-sub">まだありません。</div>')+'</div>' : '');
+}
+function saveCustomer(form){
+  var id = form.dataset.id || null;
+  var data = {};
+  ["name","honorific","postalCode","address","contactPerson","phone","email","memo"].forEach(function(f){ data[f] = qs("[name="+f+"]",form).value.trim(); });
+  if(!data.name){ toast("取引先名を入力してください"); return; }
+  saveDoc("customers", id, data).then(function(newId){ toast("取引先を保存しました"); go("#/customers/"+newId); });
+}
+function deleteCustomer(btn){
+  if(!btn.dataset.armed){ btn.dataset.armed="1"; btn.textContent="もう一度押すと削除します"; setTimeout(function(){ if(btn){ delete btn.dataset.armed; btn.textContent="この取引先を削除"; } },4000); return; }
+  deleteDoc("customers", btn.dataset.id).then(function(){ toast("取引先を削除しました（登録済みの案件はそのまま残ります）"); go("#/customers"); });
+}
+function customerForProject(p){
+  if(!p) return null;
+  var c = p.customerId ? findById(STATE.customers, p.customerId) : null;
+  if(c) return c;
+  var nm = String(p.customerName||"").replace(/\s/g,"");
+  if(!nm) return null;
+  return STATE.customers.filter(function(x){ return String(x.name||"").replace(/\s/g,"")===nm; })[0] || null;
+}
+function applyCustomerToProjectForm(form, c){
+  if(!form || !c) return;
+  qs("[name=customerName]",form).value = c.name||"";
+  qs("[name=postalCode]",form).value = c.postalCode||"";
+  qs("[name=address]",form).value = c.address||"";
+  qs("[name=contactPerson]",form).value = c.contactPerson||"";
+  var ci = [c.phone,c.email].filter(Boolean).join(" / ");
+  qs("[name=contactInfo]",form).value = ci;
+  qs("[name=honorific]",form).value = c.honorific||"御中";
+  qs("[name=customerId]",form).value = c.id;
+}
+
+/* ---------- project form ---------- */
+function renderProjectForm(project){
+  var isNew = !project;
+  var p = project || {customerName:"",siteName:"",postalCode:"",address:"",workContent:"",contactPerson:"",contactInfo:"",status:"見積中",memo:"",honorific:"",customerId:""};
+  if(isNew && currentRoute && currentRoute.query && currentRoute.query.customer){
+    var pc = findById(STATE.customers, currentRoute.query.customer);
+    if(pc){ p.customerName=pc.name||""; p.postalCode=pc.postalCode||""; p.address=pc.address||""; p.contactPerson=pc.contactPerson||""; p.contactInfo=[pc.phone,pc.email].filter(Boolean).join(" / "); p.honorific=pc.honorific||""; p.customerId=pc.id; }
+  }
+  var honor = p.honorific || (isNew ? "御中" : (p.contactPerson ? "御中" : "様"));
+  var custOptions = '<option value="">（選ぶと下の欄に自動で入ります）</option>' + STATE.customers.slice().sort(function(a,b){return String(a.name||"").localeCompare(String(b.name||""),"ja");}).map(function(c){ return '<option value="'+c.id+'"'+(c.id===p.customerId?" selected":"")+'>'+esc(customerLabel(c))+'</option>'; }).join("");
+  var relatedQuotes = !isNew ? STATE.quotes.filter(function(q){return q.projectId===p.id;}) : [];
+  var relatedInvoices = !isNew ? STATE.invoices.filter(function(i){return i.projectId===p.id;}) : [];
+
+  var relatedHtml = "";
+  if(!isNew){
+    relatedHtml = '<div class="detail-section"><h3>この案件の見積書</h3>'
+      + (relatedQuotes.length ? '<div class="mini-list">'+relatedQuotes.map(function(q){return '<a href="#/quotes/'+q.id+'"><span>'+esc(q.number||"(未採番)")+'（'+fmtDateShort(q.issueDate)+'）</span><span class="mn">'+yen(docTotal(q.items))+'</span></a>';}).join("")+'</div>' : '<div class="page-sub">まだありません。</div>')
+      + '<div style="margin-top:8px;"><button class="btn small secondary" data-nav-href="#/quotes/new?project='+p.id+'">+ この案件で見積書を作成</button></div></div>'
+      + '<div class="detail-section"><h3>この案件の請求書</h3>'
+      + (relatedInvoices.length ? '<div class="mini-list">'+relatedInvoices.map(function(iv){return '<a href="#/invoices/'+iv.id+'"><span>'+esc(iv.number||"(未採番)")+'（'+fmtDateShort(iv.issueDate)+'）</span><span class="mn">'+yen(docTotal(iv.items))+'</span></a>';}).join("")+'</div>' : '<div class="page-sub">まだありません。</div>')
+      + '<div style="margin-top:8px;"><button class="btn small secondary" data-nav-href="#/invoices/new?project='+p.id+'">+ この案件で請求書を作成</button></div></div>';
+  }
+
+  return ''
+  + '<div class="page-head"><div><div class="page-title">'+(isNew?"新規案件":esc(firstLine(p.workContent)||p.siteName||"案件"))+'</div><div class="page-sub">'+(isNew?"顧客・現場の情報を登録します":"案件情報を編集します")+'</div></div>'
+  + (isNew?"":'<button class="btn danger small" data-action="delete-project" data-id="'+p.id+'">この案件を削除</button>')
+  + '</div>'
+  + '<form class="card" id="project-form" data-id="'+(isNew?"":p.id)+'">'
+    + '<input type="hidden" name="customerId" value="'+escAttr(p.customerId||"")+'">'
+    + '<div class="field"><label>登録済みの取引先から選ぶ</label><div style="display:flex;gap:8px;flex-wrap:wrap;"><select class="input" id="customer-picker" style="flex:1 1 220px;">'+custOptions+'</select>'
+      + '<button type="button" class="btn secondary small" data-action="save-as-customer">今の顧客情報を取引先に登録</button></div></div>'
+    + '<h3 class="form-sec">宛先（帳票の左上）</h3>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>宛名（会社名・お名前）</label><input class="input" name="customerName" value="'+escAttr(p.customerName)+'" placeholder="例：株式会社〇〇"></div>'
+      + '<div class="field"><label>敬称</label><select class="input" name="honorific"><option value="御中"'+(honor==="御中"?" selected":"")+'>御中（会社あて）</option><option value="様"'+(honor==="様"?" selected":"")+'>様（個人あて）</option></select></div>'
+    + '</div>'
+    + '<input type="hidden" name="postalCode" value="'+escAttr(p.postalCode)+'">'
+    + '<input type="hidden" name="address" value="'+escAttr(p.address)+'">'
+    + '<div class="field"><label>連絡先（帳票には出ません）</label><input class="input" name="contactInfo" value="'+escAttr(p.contactInfo)+'" placeholder="電話・メールなど"></div>'
+    + '<h3 class="form-sec">件名</h3>'
+    + '<div class="field"><label>件名（見積書・請求書の件名になります）</label><textarea class="input" name="workContent" rows="2" placeholder="例：B棟実験室コンセント増設工事">'+esc(p.workContent)+'</textarea></div>'
+    + '<input type="hidden" name="siteName" value="'+escAttr(p.siteName)+'">'
+    + '<h3 class="form-sec">管理用（帳票には出ません）</h3>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>ステータス</label><select class="input" name="status">'+STATUSES.map(function(s){return '<option value="'+s+'"'+(p.status===s?" selected":"")+'>'+s+'</option>';}).join("")+'</select></div>'
+      + '<div class="field"></div>'
+    + '</div>'
+    + '<input type="hidden" name="contactPerson" value="'+escAttr(p.contactPerson)+'">'
+    + '<div class="field"><label>メモ</label><textarea class="input" name="memo" rows="2">'+esc(p.memo)+'</textarea></div>'
+    + '<div class="editor-actions"><button type="submit" class="btn">保存する</button><button type="button" class="btn secondary" data-nav-href="#/projects">一覧に戻る</button></div>'
+  + '</form>'
+  + relatedHtml;
+}
+
+function saveProject(form){
+  var id = form.dataset.id || null;
+  var data = {
+    customerName: qs("[name=customerName]",form).value.trim(),
+    siteName: qs("[name=siteName]",form).value.trim(),
+    postalCode: qs("[name=postalCode]",form).value.trim(),
+    address: qs("[name=address]",form).value.trim(),
+    workContent: qs("[name=workContent]",form).value.trim(),
+    contactPerson: qs("[name=contactPerson]",form).value.trim(),
+    contactInfo: qs("[name=contactInfo]",form).value.trim(),
+    status: qs("[name=status]",form).value,
+    memo: qs("[name=memo]",form).value.trim(),
+    honorific: qs("[name=honorific]",form).value,
+    customerId: qs("[name=customerId]",form).value
+  };
+  if(!data.customerName && !data.workContent){ toast("宛名か件名のどちらかを入力してください"); return; }
+  saveDoc("projects", id, data).then(function(newId){ toast("案件を保存しました"); go("#/projects/"+newId); });
+}
+
+function deleteProject(id){
+  if(!confirm("この案件を削除しますか？関連する見積書・請求書は削除されません。")) return;
+  deleteDoc("projects", id).then(function(){ toast("案件を削除しました"); go("#/projects"); });
+}
+
+/* ---------- quote / invoice shared list ---------- */
+function renderDocList(kind){
+  var isQuote = kind==="quote";
+  var title = isQuote ? "見積書" : "請求書";
+  return ''
+  + '<div class="page-head"><div><div class="page-title">'+title+'</div><div class="page-sub">作成した'+title+'の一覧です</div></div><button class="btn" data-nav-href="#/'+(isQuote?"quotes":"invoices")+'/new">+ 新規'+title+'</button></div>'
+  + '<div class="toolbar"><input class="input search-input" id="doc-search-'+kind+'" placeholder="'+title+'番号・件名・顧客名で検索"></div>'
+  + '<div id="doc-table-wrap-'+kind+'"></div>';
+}
+function filterDocs(kind){
+  var isQuote = kind==="quote";
+  var term = (qs("#doc-search-"+kind)&&qs("#doc-search-"+kind).value||"").trim().toLowerCase();
+  var docs = (isQuote?STATE.quotes:STATE.invoices).filter(function(d){
+    var proj = findById(STATE.projects, d.projectId);
+    var hay = [d.number, proj?proj.workContent:"", proj?proj.customerName:"", proj?proj.siteName:""].join(" ").toLowerCase();
+    return !term || hay.indexOf(term)>-1;
+  });
+  var wrap = qs("#doc-table-wrap-"+kind);
+  if(!wrap) return;
+  if(!docs.length){ wrap.innerHTML = '<div class="empty-state">まだ'+(isQuote?"見積書":"請求書")+'がありません。</div>'; return; }
+  wrap.innerHTML = '<table class="list-table"><thead><tr><th>番号</th><th>件名</th><th>顧客名</th><th>発行日</th><th class="num-cell">合計金額</th></tr></thead><tbody>'
+    + docs.map(function(d){
+      var proj = findById(STATE.projects, d.projectId);
+      var href = "#/"+(isQuote?"quotes":"invoices")+"/"+d.id;
+      var subjectText = proj ? firstLine(proj.workContent) : "";
+      return '<tr data-href="'+href+'"><td><a class="row-link" href="'+href+'">'+esc(d.number||"(下書き)")+'</a></td>'
+      + '<td class="truncate-cell" title="'+escAttr(subjectText)+'">'+esc(subjectText||"-")+'</td><td>'+esc(proj?proj.customerName:"-")+'</td>'
+      + '<td>'+fmtDateShort(d.issueDate)+'</td><td class="num-cell">'+yen(docTotal(d.items))+'</td></tr>';
+    }).join("") + '</tbody></table>';
+}
+
+/* ---------- quote / invoice editor ---------- */
+function itemRowHTML(it){
+  it = it || {name:"",qty:1,unit:"式",price:0};
+  return '<tr class="item-row" data-type="item">'
+    + '<td class="col-drag"><span class="drag-handle" title="ドラッグで並び替え" aria-label="ドラッグで並び替え">⋮⋮</span></td>'
+    + '<td class="col-name"><input class="input item-name" value="'+escAttr(it.name)+'" placeholder="品名・作業内容"></td>'
+    + '<td class="col-qty"><input class="input item-qty" type="number" step="0.5" value="'+esc(it.qty)+'"></td>'
+    + '<td class="col-unit"><input class="input item-unit" value="'+escAttr(it.unit)+'" placeholder="式"></td>'
+    + '<td class="col-price"><input class="input item-price" type="number" step="1" value="'+esc(it.price)+'"></td>'
+    + '<td class="col-del"><button type="button" class="btn-icon" data-action="remove-item-row" aria-label="削除">×</button></td>'
+    + '</tr>';
+}
+function headingRowHTML(it){
+  it = it || {name:""};
+  return '<tr class="item-row" data-type="heading">'
+    + '<td class="col-drag"><span class="drag-handle" title="ドラッグで並び替え" aria-label="ドラッグで並び替え">⋮⋮</span></td>'
+    + '<td class="col-name" colspan="4"><input class="input item-heading-name" value="'+escAttr(it.name)+'" placeholder="見出し（例：材料、労務費）"></td>'
+    + '<td class="col-del"><button type="button" class="btn-icon" data-action="remove-item-row" aria-label="削除">×</button></td>'
+    + '</tr>';
+}
+function rowHTML(it){ return (it && it.type==="heading") ? headingRowHTML(it) : itemRowHTML(it); }
+
+function templateDefaults(name){
+  var rate = (STATE.settings && STATE.settings.laborRate) || DEFAULT_SETTINGS.laborRate;
+  var map = {
+    "材料費": {name:"", qty:1, unit:"式", price:0},
+    "労務費": {name:"労務費（電工）", qty:1, unit:"人工", price:rate},
+    "諸経費": {name:"諸経費", qty:1, unit:"式", price:0},
+    "廃材処分費": {name:"廃材処分費", qty:1, unit:"式", price:0},
+    "養生費": {name:"養生費", qty:1, unit:"式", price:0},
+    "交通費・出張費": {name:"交通費", qty:1, unit:"回", price:0},
+    "駐車場代": {name:"駐車場代", qty:1, unit:"日", price:0}
+  };
+  return map[name];
+}
+function groupItemsIntoSections(items){
+  var sections = [];
+  var current = {name:null, items:[]};
+  items.forEach(function(it){
+    if(it.type==="heading"){
+      if(current.items.length || current.name) sections.push(current);
+      current = {name: it.name, items:[]};
+    } else {
+      current.items.push(it);
+    }
+  });
+  if(current.items.length || current.name) sections.push(current);
+  return sections;
+}
+var lastFocusedRow = null;
+document.addEventListener("focusin", function(e){
+  var row = e.target.closest && e.target.closest(".item-row");
+  if(row) lastFocusedRow = row;
+});
+function insertRowAfterFocus(tbody, html){
+  var anchor = (lastFocusedRow && tbody.contains(lastFocusedRow)) ? lastFocusedRow : null;
+  if(anchor){
+    anchor.insertAdjacentHTML("afterend", html);
+    lastFocusedRow = anchor.nextElementSibling;
+  } else {
+    tbody.insertAdjacentHTML("beforeend", html);
+    lastFocusedRow = tbody.lastElementChild;
+  }
+  return lastFocusedRow;
+}
+function computeRoundingDiscount(subtotal){
+  for(var d=0; d<200; d++){
+    var ns = subtotal - d;
+    var nt = ns + Math.round(ns*0.1);
+    if(((nt%100)+100)%100 === 0) return d;
+  }
+  return 0;
+}
+function insertTemplate(name, form){
+  var body = qs("tbody[id$='-items']", form);
+  if(!body) return;
+  if(name==="端数値引き"){
+    var items = collectItems(form).filter(function(it){ return it.type!=="heading"; });
+    var subtotal = items.reduce(function(s,it){ return s+it.qty*it.price; },0);
+    var d = computeRoundingDiscount(subtotal);
+    if(d===0){ toast("すでに100円単位なので調整は不要です"); return; }
+    insertRowAfterFocus(body, itemRowHTML({name:"端数値引き",qty:1,unit:"式",price:-d}));
+  } else {
+    insertRowAfterFocus(body, headingRowHTML({name:name}));
+    insertRowAfterFocus(body, itemRowHTML(templateDefaults(name)));
+  }
+  var scope = form.closest(".doc-editor");
+  if(scope) updatePreview(scope.dataset.kind, form);
+}
+
+function renderDocEditor(kind, doc, query){
+  var isQuote = kind==="quote";
+  var isNew = !doc;
+  var d = doc || null;
+  var projectId = d ? d.projectId : (query.project || "");
+  var items = d ? (d.items||[]) : [];
+  var issueDate = d ? d.issueDate : todayStr();
+  var secondaryDate = isQuote
+    ? (d ? d.validUntil : addDaysStr(issueDate, (STATE.settings&&STATE.settings.quoteValidDays)||30))
+    : (d ? d.dueDate : addDaysStr(issueDate, (STATE.settings&&STATE.settings.invoiceDueDays)||30));
+  var notes = d ? (d.notes||"") : (isQuote?"":"");
+  var linkedQuoteId = !isQuote ? (d ? d.quoteId||"" : (query.quote||"")) : "";
+
+  if(!isQuote && isNew && query.quote){
+    var srcQ = findById(STATE.quotes, query.quote);
+    if(srcQ){
+      items = (srcQ.items&&srcQ.items.length) ? srcQ.items.slice() : items;
+      if(!projectId) projectId = srcQ.projectId;
+    }
+  }
+
+  if(!STATE.projects.length){
+    return '<div class="page-head"><div class="page-title">'+(isQuote?"新規見積書":"新規請求書")+'</div></div>'
+      + '<div class="empty-state">先に案件を登録してください。<div><button class="btn" data-nav-href="#/projects/new">+ 新規案件を登録</button></div></div>';
+  }
+
+  var projectOptions = STATE.projects.map(function(p){
+    return '<option value="'+p.id+'"'+(p.id===projectId?" selected":"")+'>'+esc(firstLine(p.workContent)||p.siteName||p.customerName)+' ／ '+esc(p.customerName||"")+'</option>';
+  }).join("");
+
+  var quotePickerHtml = "";
+  if(!isQuote){
+    var relatedQuotes = projectId ? STATE.quotes.filter(function(q){return q.projectId===projectId;}) : [];
+    quotePickerHtml = '<div class="field"><label>元になった見積書（任意）</label><select class="input" name="quoteId" id="quote-picker">'
+      + '<option value="">選択しない</option>'
+      + relatedQuotes.map(function(q){return '<option value="'+q.id+'"'+(q.id===linkedQuoteId?" selected":"")+'>'+esc(q.number)+'（'+fmtDateShort(q.issueDate)+'　'+yen(docTotal(q.items))+'）</option>';}).join("")
+      + '</select></div>';
+  }
+
+  var deleteBtn = isNew ? "" : '<button type="button" class="btn danger" data-action="delete-'+kind+'" data-id="'+d.id+'">削除</button>';
+  var quoteProj = (isQuote && !isNew) ? findById(STATE.projects, d.projectId) : null;
+  var orderBtn = (quoteProj && (quoteProj.status==="見積中" || !quoteProj.status)) ? '<button type="button" class="btn" data-action="mark-ordered" data-project="'+esc(d.projectId)+'">受注にする</button>' : "";
+  var makeInvoiceBtn = (isQuote && !isNew) ? '<button type="button" class="btn secondary" data-nav-href="#/invoices/new?project='+d.projectId+'&quote='+d.id+'">この見積書から請求書を作成</button>' : "";
+
+  return ''
+  + '<div class="page-head"><div><div class="page-title">'+(isQuote?(isNew?"新規見積書":"見積書 "+esc(d.number||"")):(isNew?"新規請求書":"請求書 "+esc(d.number||"")))+'</div>'
+    + '<div class="page-sub">入力するとプレビューにリアルタイムで反映されます</div></div></div>'
+  + '<div class="editor-grid doc-editor" data-kind="'+kind+'">'
+    + '<form id="'+kind+'-form" data-id="'+(isNew?"":d.id)+'" data-number="'+esc(d?d.number:"")+'">'
+      + '<div class="card">'
+        + '<div class="field"><label>案件</label><select class="input" name="projectId" id="project-picker">'+projectOptions+'</select>'
+          + '<div style="margin-top:6px;"><a id="project-detail-link" href="#/projects/'+esc(projectId)+'" style="font-size:12.5px;">案件の詳細・工事内容を編集 →</a></div></div>'
+        + quotePickerHtml
+        + '<div class="field"><label>件名</label><div class="input" id="subject-display" style="background:var(--paper);min-height:22px;white-space:pre-wrap;line-height:1.5;"></div>'
+          + '<div class="page-sub" style="margin-top:5px;">案件の「工事内容」がそのまま件名になります。内容を変えたい場合は案件ページで工事内容を編集してください。</div></div>'
+        + '<div class="field"><label>宛名の下に表示する（登録した取引先の情報から）</label><div class="tgl-row">'
+          + '<label class="tgl"><input type="checkbox" id="'+kind+'-show-address" name="showAddress"'+((d&&d.showAddress)?" checked":"")+'> 住所</label>'
+          + '<label class="tgl"><input type="checkbox" id="'+kind+'-show-contact" name="showContact"'+((d&&d.showContact)?" checked":"")+'> 担当者</label>'
+          + '</div><div class="page-sub" id="cust-hint" style="margin-top:5px;"></div></div>'
+        + '<div class="field-row">'
+          + '<div class="field"><label>発行日</label><input class="input" type="date" name="issueDate" value="'+esc(issueDate)+'"></div>'
+          + '<div class="field"><label>'+(isQuote?"有効期限":"お支払期限")+'</label><input class="input" type="date" name="secondaryDate" value="'+esc(secondaryDate)+'"></div>'
+        + '</div>'
+        + '<div class="field"><label>明細</label>'
+          + '<table class="item-table"><thead><tr><th class="col-drag"></th><th class="col-name">品名・作業内容</th><th class="col-qty">数量</th><th class="col-unit">単位</th><th class="col-price">単価</th><th class="col-del"></th></tr></thead>'
+          + '<tbody id="'+kind+'-items">'+items.map(rowHTML).join("")+'</tbody></table>'
+          + '<button type="button" class="btn secondary small" data-action="add-item-row">+ 行を追加</button>'
+          + '<button type="button" class="btn secondary small" data-action="add-heading-row" style="margin-left:6px;">+ 見出しを追加</button>'
+          + '<select class="input template-picker" style="width:auto;display:inline-block;margin-left:6px;"><option value="">テンプレートを追加…</option>'
+            + TEMPLATE_NAMES.map(function(n){return '<option value="'+esc(n)+'">＋ '+esc(n)+'</option>';}).join("")
+            + '<option value="端数値引き">＋ 端数値引き（100円未満を調整）</option>'
+          + '</select>'
+        + '</div>'
+        + '<div class="field"><label>備考</label><textarea class="input" name="notes" rows="3">'+esc(notes)+'</textarea></div>'
+      + '</div>'
+      + '<div class="editor-actions">'
+        + '<button type="submit" class="btn">保存する</button>'
+        + '<button type="button" class="btn secondary" data-action="print-doc" data-kind="'+kind+'">PDF出力</button>'
+        + orderBtn + makeInvoiceBtn + deleteBtn
+      + '</div>'
+    + '</form>'
+    + '<div class="paper-frame"><div class="doc-pages" id="print-target"></div></div>'
+  + '</div>';
+}
+
+function afterEditorMount(kind){
+  var scope = qs('.doc-editor[data-kind="'+kind+'"]');
+  if(scope) updatePreview(kind, qs("#"+kind+"-form",scope));
+}
+
+function collectItems(form){
+  return qsa(".item-row",form).map(function(row){
+    if(row.dataset.type === "heading"){
+      return { type:"heading", name: qs(".item-heading-name",row).value.trim(), qty:0, unit:"", price:0 };
+    }
+    return {
+      type:"item",
+      name: qs(".item-name",row).value.trim(),
+      qty: parseFloat(qs(".item-qty",row).value)||0,
+      unit: qs(".item-unit",row).value.trim()||"式",
+      price: parseFloat(qs(".item-price",row).value)||0
+    };
+  });
+}
+
+/* 1行に収めたい文字が折り返すときは、小さくなりすぎない範囲で自動縮小する */
+function fitTexts(root){
+  if(!root) return;
+  qsa(".fit", root).forEach(function(el){
+    el.style.fontSize=""; el.classList.remove("fit-wrap");
+    if(el.scrollWidth <= el.clientWidth + 1) return;
+    var base = parseFloat(getComputedStyle(el).fontSize) || 12;
+    var min = Math.max(8, base*0.72), fs = base;
+    while(fs > min && el.scrollWidth > el.clientWidth + 1){ fs = Math.max(min, fs - 0.5); el.style.fontSize = fs + "px"; }
+    if(el.scrollWidth > el.clientWidth + 1){ el.classList.add("fit-wrap"); }
+  });
+}
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ var sc0=qs(".doc-editor"); if(sc0){ updatePreview(sc0.dataset.kind, qs("form",sc0)); } }); }
+/* 金額の枠の上端を、自社情報の一番下の行の下にそろえる（件名などもまとめて動く） */
+function alignAmtBox(root){
+  if(!root) return;
+  var amt = qs(".d-amt", root), low = qs(".d-lowleft", root);
+  if(!amt || !low) return;
+  low.style.marginTop = "";
+  var box = qs(".d-amt .d-box", root) || amt;
+  var bank = qs(".d-bankr", root);
+  var sc = (root.getBoundingClientRect().width / (root.offsetWidth||1)) || 1;
+  for(var i=0;i<5;i++){
+    var delta;
+    if(bank){
+      /* 請求書：金額の枠の下の線を、お振込先の枠の下の線にそろえる */
+      delta = (bank.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom) / sc;
+    } else {
+      /* 見積書：金額の枠の上の線を、自社情報の一番下の行の下にそろえる */
+      var rows = qsa(".d-issuer > *", root);
+      if(!rows.length) return;
+      delta = (rows[rows.length-1].getBoundingClientRect().bottom - amt.getBoundingClientRect().top) / sc + 8;
+    }
+    if(Math.abs(delta) < 0.5) break;
+    var base = parseFloat(getComputedStyle(low).marginTop) || 0;
+    low.style.marginTop = Math.max(6, base + delta) + "px";
+  }
+}
+/* 明細が1枚に収まらないときは、A4のページに分けて並べる */
+function renderPages(target, parts){
+  target.innerHTML = "";
+  target.classList.add("measuring");
+  var pages = [];
+  function newPage(first){
+    var pg = document.createElement("div");
+    pg.className = "doc-page";
+    pg.innerHTML = (first ? parts.head : parts.cont)
+      + '<div class="d-items-wrap"><table class="d-items">'+parts.thead+'<tbody></tbody></table></div>';
+    target.appendChild(pg);
+    pages.push(pg);
+    if(first){ fitTexts(pg); alignAmtBox(pg); }
+    return pg;
+  }
+  function sc(){ return (target.getBoundingClientRect().width / (target.offsetWidth||1)) || 1; }
+  function limitOf(pg){ /* 使える一番下（ページ番号の分をあける） */
+    var cs = getComputedStyle(pg);
+    return pg.clientHeight - parseFloat(cs.paddingBottom||0);
+  }
+  function usedOf(pg){
+    var last = pg.lastElementChild;
+    var r0 = pg.getBoundingClientRect();
+    return (last.getBoundingClientRect().bottom - r0.top) / sc();
+  }
+  function bodyOf(pg){ return pg.querySelector(".d-items tbody"); }
+  function addRow(pg, html){
+    var tb = bodyOf(pg);
+    tb.insertAdjacentHTML("beforeend", html);
+    var tr = tb.lastElementChild;
+    fitTexts(tr);
+    return tr;
+  }
+
+  var pg = newPage(true);
+  var i;
+  for(i=0;i<parts.rows.length;i++){
+    var tr = addRow(pg, parts.rows[i]);
+    if(usedOf(pg) > limitOf(pg)){
+      tr.parentNode.removeChild(tr);
+      /* 見出し行や空行がページの最後に1行だけ残らないようにする */
+      var tb = bodyOf(pg), lastTr = tb.lastElementChild, carry = [];
+      if(lastTr && (lastTr.classList.contains("d-sec") || lastTr.classList.contains("d-gap")) && tb.children.length > 1){
+        carry.push(lastTr.outerHTML); tb.removeChild(lastTr);
+      }
+      pg = newPage(false);
+      carry.forEach(function(h){ addRow(pg, h); });
+      if(parts.rows[i].indexOf('class="d-gap"') === -1) addRow(pg, parts.rows[i]);
+    }
+  }
+
+  /* 内訳・備考をつけて、入らなければ次のページへ */
+  pg.insertAdjacentHTML("beforeend", parts.tail);
+  fitTexts(pg);
+  if(usedOf(pg) > limitOf(pg)){
+    qsa(":scope > .d-bottom, :scope > .d-notes", pg).forEach(function(el){ el.parentNode.removeChild(el); });
+    pg = newPage(false);
+    pg.insertAdjacentHTML("beforeend", parts.tail);
+    fitTexts(pg);
+  }
+  /* 最後のページの空きを空行で埋める（備考欄は最低限の高さを残す） */
+  var bottomBlock = pg.querySelector(":scope > .d-bottom");
+  for(var g=0; g<60; g++){
+    var tr2 = addRow(pg, parts.filler());
+    if(usedOf(pg) > limitOf(pg)){ tr2.parentNode.removeChild(tr2); break; }
+  }
+
+  target.classList.remove("measuring");
+  /* 途中のページは、表を少し伸ばしてページの下まできっちり埋める */
+  pages.forEach(function(p, k){
+    if(k === pages.length-1) return;
+    var tbl = p.querySelector(".d-items");
+    var rest = limitOf(p) - usedOf(p);
+    if(tbl && rest > 0.5){ tbl.style.height = (tbl.getBoundingClientRect().height / sc() + rest) + "px"; }
+  });
+  var n = pages.length;
+  pages.forEach(function(p, k){
+    var f = document.createElement("div");
+    f.className = "d-pageno";
+    f.textContent = (n > 1 && parts.docNo ? parts.docNo + "　　" : "") + (k+1) + " / " + n;
+    p.appendChild(f);
+  });
+}
+function fitPaper(){
+  var frame = qs(".paper-frame"), paper = qs("#print-target");
+  if(!frame || !paper) return;
+  paper.style.transform = "none";
+  var natural = paper.offsetWidth || 794;
+  var sc = Math.min(1, (frame.clientWidth || natural) / natural);
+  paper.style.transform = sc < 1 ? "scale("+sc+")" : "none";
+  frame.style.height = Math.ceil(paper.offsetHeight * sc) + "px";
+  if(window.ResizeObserver && !frame._ro){
+    frame._ro = new ResizeObserver(function(){ var w=frame.clientWidth; if(w!==frame._lw){ frame._lw=w; fitPaper(); } });
+    frame._ro.observe(frame);
+  }
+}
+window.addEventListener("resize", function(){ fitPaper(); });
+function updatePreview(kind, form){
+  if(!form) return;
+  var isQuote = kind==="quote";
+  var items = collectItems(form);
+  var subtotal = items.reduce(function(s,it){return it.type==="heading" ? s : s+it.qty*it.price;},0);
+  var tax = Math.round(subtotal*0.1);
+  var total = subtotal+tax;
+  var projectId = qs("[name=projectId]",form).value;
+  var project = findById(STATE.projects, projectId);
+  var number = form.dataset.number || "(保存時に採番されます)";
+  var subject = (project && project.workContent) || "";
+  var issueDate = qs("[name=issueDate]",form).value;
+  var secondaryDate = qs("[name=secondaryDate]",form).value;
+  var notes = qs("[name=notes]",form).value;
+  var s = STATE.settings || DEFAULT_SETTINGS;
+
+  function num(n){ return (Math.round(Number(n)||0)).toLocaleString("ja-JP"); }
+  function en(n){ return num(n)+"円"; }
+  function qtyStr(q){ var n=Number(q)||0; return (Math.round(n*100)/100).toLocaleString("ja-JP"); }
+
+  var visibleItems = items.filter(function(it){return it.type==="heading" ? it.name : (it.name||it.qty||it.price);});
+  var sections = groupItemsIntoSections(visibleItems);
+  var rowList = [];
+  var zebra = false; /* 見出しの直後は白から始める */
+  function zr(){ var c = zebra ? ' class="z"' : ''; zebra = !zebra; return c; }
+  sections.forEach(function(sec, i){
+    if(i>0 && rowList.length){ rowList.push('<tr class="d-gap"><td colspan="4"></td></tr>'); }
+    if(sec.name){
+      var secSubtotal = sec.items.reduce(function(s,it){return s+it.qty*it.price;},0);
+      rowList.push('<tr class="d-sec"><td colspan="3"><div class="fit">'+esc(sec.name)+'</div></td><td class="num">'+num(secSubtotal)+'</td></tr>');
+      zebra = false;
+    }
+    sec.items.forEach(function(it){
+      rowList.push('<tr'+zr()+'><td><div class="fit">'+esc(it.name)+'</div></td><td class="c"><div class="fit">'+qtyStr(it.qty)+' '+esc(it.unit)+'</div></td><td class="num">'+num(it.price)+'</td><td class="num">'+num(it.qty*it.price)+'</td></tr>');
+    });
+  });
+  function fillerRow(){ return '<tr'+zr()+'><td></td><td></td><td></td><td></td></tr>'; }
+
+  var hasContact = project && project.contactPerson;
+  var cust = customerForProject(project);
+  var showAddr = !!(qs("[name=showAddress]",form)||{}).checked;
+  var showCont = !!(qs("[name=showContact]",form)||{}).checked;
+  var contactName = (showCont && cust && cust.contactPerson) ? String(cust.contactPerson).replace(/\s*(様|さま|殿)\s*$/,"") : "";
+  var honor = project ? (project.honorific||(hasContact?'御中':'様')) : '';
+  if(contactName && honor==="御中") honor = ""; /* 担当者あての時は「御中」を付けない */
+  var clientHtml = '<div class="d-client">'
+    + '<div class="d-client-name fit">'+esc(project?(project.customerName||project.siteName||""):"（案件を選択してください）")+(honor?'<span class="d-hon">'+honor+'</span>':'')+'</div>'
+    + (showAddr && cust && cust.postalCode ? '<div class="fit">〒'+esc(String(cust.postalCode).replace(/^〒/,""))+'</div>' : '')
+    + (showAddr && cust && cust.address ? '<div class="fit">'+esc(cust.address)+'</div>' : '')
+    + (contactName ? '<div class="d-attn fit">'+esc(contactName)+'<span class="d-hon">様</span></div>' : '')
+    + '</div>';
+  var hintEl = qs("#cust-hint", form);
+  if(hintEl){
+    if(!project) hintEl.textContent = "";
+    else if(!cust) hintEl.textContent = "この案件には取引先がつながっていません。案件画面の「登録済みの取引先から選ぶ」で選ぶと使えます。";
+    else {
+      var miss = [];
+      if(showAddr && !cust.address) miss.push("住所");
+      if(showCont && !cust.contactPerson) miss.push("担当者名");
+      hintEl.textContent = "取引先「"+(cust.name||"")+"」の情報を使います。" + (miss.length ? "（取引先に"+miss.join("・")+"が登録されていません）" : "");
+    }
+  }
+
+  var metaRows = isQuote
+    ? [["見積日",issueDate||""],["見積書番号",number]]
+    : [["請求日",issueDate||""],["請求書番号",number],["登録番号",s.invoiceRegNumber||""]];
+  if(isQuote && s.invoiceRegNumber) metaRows.push(["登録番号",s.invoiceRegNumber]);
+  var metaHtml = '<table class="d-meta"><tbody>'+metaRows.map(function(r){return '<tr><td class="k">'+r[0]+'</td><td class="v"><div class="fit">'+esc(r[1])+'</div></td></tr>';}).join("")+'</tbody></table>';
+
+  function issRow(label, val){ if(!String(val||"").trim()) return ''; return '<div class="d-iss-row" data-k="'+label+'"><span class="l">'+label+'</span><span>：</span><span class="v fit">'+val+'</span></div>'; }
+  var issuerHtml = '<div class="d-issuer"><div class="d-issuer-name fit">'+esc(s.companyName)+'</div>'
+    + issRow("代表者", esc(s.repName||""))
+    + issRow("住所", (s.postalCode?'〒'+esc(String(s.postalCode).replace(/^〒/,""))+' ':'')+esc(s.address||""))
+    + issRow("電話", esc(s.phone||""))
+    + issRow("メール", esc(s.email||""))
+    + '</div>';
+
+  var subjectHtml = '<div class="d-subject"><span>件名</span><span class="fit">'+esc(subject||"-").replace(/\n/g,"<br>")+'</span></div>';
+  var lowLeft, amtBlock;
+  if(isQuote){
+    lowLeft = subjectHtml;
+    amtBlock = '<table class="d-box"><thead><tr><th style="width:30%">小計</th><th style="width:25%">消費税</th><th>見積金額</th></tr></thead>'
+      + '<tbody><tr><td class="num">'+en(subtotal)+'</td><td class="num">'+en(tax)+'</td><td class="num big">'+en(total)+'</td></tr></tbody></table>'
+      + '<table class="d-box d-valid"><tbody><tr><th style="width:30%">有効期限</th><td style="text-align:center;">'+esc(secondaryDate||"")+'</td></tr></tbody></table>';
+  } else {
+    lowLeft = '<p class="d-lead">下記の通りご請求申し上げます。</p>'
+      + subjectHtml;
+    amtBlock = '<table class="d-box"><thead><tr><th style="width:30%">小計</th><th style="width:25%">消費税</th><th>請求金額</th></tr></thead>'
+      + '<tbody><tr><td class="num">'+en(subtotal)+'</td><td class="num">'+en(tax)+'</td><td class="num big">'+en(total)+'</td></tr></tbody></table>';
+  }
+
+  var breakdownRow = '<tr><td colspan="2"><div class="d-bd"><span>内訳</span><span>10%対象(税抜)</span><span>'+en(subtotal)+'</span>'
+    + '<span></span><span class="sub">10%消費税</span><span class="sub">'+en(tax)+'</span></div></td></tr>';
+  var sumHtml = '<table class="d-sum"><tbody>'+breakdownRow+'</tbody></table>';
+
+  var bankHtml = isQuote ? '' : '<table class="d-bank"><colgroup><col style="width:6em"><col></colgroup><thead><tr><th colspan="2">お振込先</th></tr></thead><tbody>'
+      + '<tr><td class="k">金融機関</td><td><div class="fit">'+esc([s.bankName,s.branchName].filter(Boolean).join(" "))+'</div></td></tr>'
+      + '<tr><td class="k">口座</td><td><div class="fit">'+esc([s.accountType,s.accountNumber].filter(Boolean).join(" "))+'</div></td></tr>'
+      + '<tr><td class="k">口座名義</td><td><div class="fit">'+esc(s.accountHolder||"")+'</div></td></tr>'
+      + '</tbody></table>';
+  function bankRow(k,v){ return '<tr><td class="bk-k">'+k+'</td><td><div class="bk-v fit">'+esc(v||"")+'</div></td></tr>'; }
+  var bankRightHtml = isQuote ? '' : '<table class="d-box d-bankr"><colgroup><col style="width:5em"><col></colgroup><thead><tr><th colspan="2">お振込先</th></tr></thead><tbody>'
+    + bankRow("金融機関", [s.bankName,s.branchName].filter(Boolean).join("　"))
+    + bankRow("口座番号", [s.accountType,s.accountNumber].filter(Boolean).join("　"))
+    + bankRow("口座名義", s.accountHolder||"")
+    + '</tbody></table>';
+  var bottomLeft = '<div></div>';
+
+  var html = ''
+  + '<div class="d-title">'+(isQuote?"見積書":"請求書")+'</div>'
+  + '<div class="d-grid">'
+    + '<div class="d-leftcol">'+clientHtml+'<div class="d-lowleft">'+lowLeft+'<div class="d-amt">'+amtBlock+'</div></div></div>'
+    + '<div class="d-right"><div class="d-metacell">'+metaHtml+'</div>'+issuerHtml+bankRightHtml+'</div>'
+  + '</div>'
+  ;
+  var docLabel = isQuote ? "見積書" : "請求書";
+  var parts = {
+    head: html,
+    thead: '<thead><tr><th>摘要</th><th style="width:13%">数量</th><th style="width:14%">単価</th><th style="width:18%">明細金額</th></tr></thead>',
+    rows: rowList,
+    filler: fillerRow,
+    tail: '<div class="d-bottom">'+bottomLeft+sumHtml+'</div>'
+      + '<div class="d-notes"><div class="k">備考</div><div class="b">'+(notes?esc(notes).replace(/\n/g,"<br>"):"")+'</div></div>',
+    cont: '',
+    docNo: number
+  };
+  var target = qs("#print-target");
+  if(target){ renderPages(target, parts); fitPaper(); }
+  var subjectDisplay = qs("#subject-display", form);
+  if(subjectDisplay) subjectDisplay.textContent = project ? (project.workContent || "（工事内容が未入力です）") : "（案件を選択してください）";
+  var detailLink = qs("#project-detail-link", form);
+  if(detailLink){ detailLink.href = project ? "#/projects/"+project.id : "#/projects"; }
+}
+
+function saveCurrentDoc(kind, form){
+  var projectId = qs("[name=projectId]",form).value;
+  if(!projectId){ toast("案件を選択してください"); return; }
+  var items = collectItems(form).filter(function(it){ return it.name || it.qty || it.price; });
+  if(!items.length){ toast("明細を1件以上入力してください"); return; }
+  var isQuote = kind==="quote";
+  var id = form.dataset.id || null;
+  var data = {
+    projectId: projectId,
+    issueDate: qs("[name=issueDate]",form).value,
+    items: items,
+    notes: qs("[name=notes]",form).value.trim(),
+    showAddress: !!(qs("[name=showAddress]",form)||{}).checked,
+    showContact: !!(qs("[name=showContact]",form)||{}).checked,
+    number: form.dataset.number || ""
+  };
+  if(isQuote){ data.validUntil = qs("[name=secondaryDate]",form).value; }
+  else { data.dueDate = qs("[name=secondaryDate]",form).value; var qp=qs("[name=quoteId]",form); data.quoteId = qp?qp.value:""; }
+
+  var numberPromise = data.number ? Promise.resolve(data.number) : nextNumber(kind);
+  numberPromise.then(function(number){
+    data.number = number;
+    saveDoc(isQuote?"quotes":"invoices", id, data).then(function(newId){
+      toast((isQuote?"見積書":"請求書")+"を保存しました");
+      if(!isQuote){
+        var proj = findById(STATE.projects, projectId);
+        var savedInv = findById(STATE.invoices, newId);
+        if(proj && proj.status!=="入金済み" && !(savedInv && savedInv.exportedAt)){ saveDoc("projects", projectId, {status:"請求前"}); }
+      } else {
+        var proj2 = findById(STATE.projects, projectId);
+        if(proj2 && !proj2.status){ saveDoc("projects", projectId, {status:"見積中"}); }
+      }
+      go("#/"+(isQuote?"quotes":"invoices")+"/"+newId);
+    });
+  });
+}
+function deleteCurrentDoc(kind,id){
+  var label = kind==="quote"?"見積書":"請求書";
+  if(!confirm("この"+label+"を削除しますか？")) return;
+  deleteDoc(kind==="quote"?"quotes":"invoices", id).then(function(){ toast(label+"を削除しました"); go("#/"+(kind==="quote"?"quotes":"invoices")); });
+}
+
+function printCurrentDoc(kind){
+  var scope = qs('.doc-editor[data-kind="'+kind+'"]');
+  var form = scope ? qs("#"+kind+"-form", scope) : null;
+  if(form) updatePreview(kind, form);
+  var target = qs("#print-target");
+  if(!target) return;
+  if(PDF_BUSY) return;
+  PDF_BUSY = true;
+  var prefix = kind==="quote" ? "見積書" : "請求書";
+  var num = form ? form.dataset.number : "";
+  var filename = prefix + (num ? "_"+num : "") + ".pdf";
+  toast("PDFを作成中…");
+  var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  Promise.all([loadPdfLibs(), fontsReady]).then(function(){
+    return buildPdfBlob(target);
+  }).then(function(blob){
+    return claude.use("downloads").then(function(downloads){
+      if(!downloads){ toast("このビューではファイル保存を利用できません。"); return null; }
+      return downloads.save({filename:filename, data:blob});
+    });
+  }).then(function(res){
+    PDF_BUSY = false;
+    if(res && res.status){
+      toast("PDFを保存しました");
+      if(kind==="invoice") markInvoiceExported(form);
+    }
+  }).catch(function(err){
+    PDF_BUSY = false;
+    if(err && err.code === "declined") return;
+    toast("PDFの作成に失敗しました");
+  });
+}
+
+/* ---------- 本物のPDFを作る(スマホ・PC共通) ---------- */
+var PDF_BUSY = false;
+var PDF_LIBS = null;
+function loadScriptOnce(src){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement("script");
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+function loadPdfLibs(){
+  if(!PDF_LIBS){
+    PDF_LIBS = Promise.all([
+      window.html2canvas ? null : loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
+      (window.jspdf && window.jspdf.jsPDF) ? null : loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js")
+    ]).catch(function(e){ PDF_LIBS = null; throw e; });
+  }
+  return PDF_LIBS;
+}
+function buildPdfBlob(target){
+  var pages = Array.prototype.slice.call(target.querySelectorAll(".doc-page"));
+  if(!pages.length) return Promise.reject(new Error("no pages"));
+  var pdf = new window.jspdf.jsPDF({unit:"mm", format:"a4", orientation:"portrait", compress:true});
+  // 画面用の縮小(transform)を外した状態で、1ページずつA4実寸で撮る
+  var opts = {
+    scale: 3, backgroundColor: "#ffffff", useCORS: true, logging: false, windowWidth: 1280,
+    onclone: function(doc){
+      var t = doc.getElementById("print-target");
+      if(t){ t.style.transform = "none"; t.style.gap = "0"; }
+      var fr = doc.querySelector(".paper-frame");
+      if(fr){ fr.style.overflow = "visible"; fr.style.height = "auto"; fr.style.position = "static"; }
+      Array.prototype.forEach.call(doc.querySelectorAll("#print-target .doc-page"), function(p){
+        p.style.border = "none"; p.style.boxShadow = "none";
+      });
+    }
+  };
+  var chain = Promise.resolve();
+  pages.forEach(function(page, i){
+    chain = chain.then(function(){ return window.html2canvas(page, opts); }).then(function(canvas){
+      if(i > 0) pdf.addPage("a4", "portrait");
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297);
+      canvas.width = canvas.height = 0;
+    });
+  });
+  return chain.then(function(){ return pdf.output("blob"); });
+}
+
+function markInvoiceExported(form){
+  if(!form) return;
+  var invId = form.dataset.id;
+  var projectId = (qs("[name=projectId]",form)||{}).value;
+  if(!invId){ toast("請求書を保存してから書き出すと「請求済み」になります"); return; }
+  saveDoc("invoices", invId, {exportedAt: Date.now()});
+  var proj = findById(STATE.projects, projectId);
+  if(proj && proj.status!=="入金済み"){ saveDoc("projects", projectId, {status:"請求済み"}); }
+}
+function buildStandaloneDocHtml(kind, innerHtml){
+  var title = kind==="quote" ? "御見積書" : "請求書";
+  return '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    + '<title>'+esc(title)+'</title>'
+    + '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">'
+    + '<style>'
+    + 'body{margin:0;background:#F2F5F3;font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;padding:24px;}'
+    + '.print-bar{max-width:720px;margin:0 auto 14px;text-align:right;}'
+    + '.print-btn{background:#A83D5E;color:#fff;border:none;padding:10px 18px;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;}'
+    + '.doc-pages{width:210mm;margin:0 auto;}'
+    + '.doc-page{background:#fff;border:1px solid #DCE2DE;width:210mm;height:297mm;padding:15mm 15mm 14mm;margin:0 auto 14px;position:relative;overflow:hidden;}'
+    + DOC_CSS
+    + '@media print{ .print-bar{display:none;} body{background:#fff;padding:0;} .doc-page{border:none;margin:0;break-after:page;page-break-after:always;} .doc-page:last-child{break-after:auto;page-break-after:auto;} @page{size:A4;margin:0;} }'
+    + '</style></head><body>'
+    + '<div class="print-bar"><button class="print-btn" onclick="window.print()">印刷 / PDFとして保存</button></div>'
+    + '<div class="doc-pages">'+innerHtml+'</div>'
+    + '</body></html>';
+}
+
+/* ---------- バックアップ（非常用アプリ） ---------- */
+function stripId(o){ var c = Object.assign({}, o); delete c.id; return c; }
+function backupPayload(){
+  var docs = {};
+  docs["settings/company"] = Object.assign({}, STATE.settings || DEFAULT_SETTINGS);
+  ["projects","customers","quotes","invoices"].forEach(function(col){
+    (STATE[col]||[]).forEach(function(d){ if(d && d.id) docs[col+"/"+d.id] = stripId(d); });
+  });
+  return { format:"sakura-densetsu-backup", version:1, exportedAt:new Date().toISOString(), docs:docs };
+}
+function buildBackupHtml(payload){
+  var css = (document.getElementById("app-style")||{}).textContent || "";
+  var app = (document.getElementById("app-script")||{}).textContent || "";
+  var json = payload ? JSON.stringify(payload).replace(/</g,"\\u003c") : "";
+  var shim = "(" + offlineShim.toString() + ")();";
+  return '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+    + '<title>桜電設 見積・請求書管理'+(payload?'（非常用バックアップ）':'')+'</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">'
+    + '<style id="app-style">' + css + '</style></head><body>'
+    + SHELL_HTML + '<div class="toast" id="toast"></div>'
+    + (payload ? '<script type="application/json" id="sakura-data">' + json + '</scr'+'ipt>' : '')
+    + '<script>' + shim + '</scr'+'ipt>'
+    + '<script id="app-script">' + app + '</scr'+'ipt>'
+    + '</body></html>';
+}
+function saveFile(filename, blob){
+  return claude.use("downloads").then(function(downloads){
+    if(!downloads){ var e = new Error("unavailable"); e.code = "unavailable"; throw e; }
+    return downloads.save({filename:filename, data:blob});
+  });
+}
+function runBackup(btn){
+  if(!STATE.ready){ toast("データの読み込み中です。少し待ってからもう一度押してください"); return; }
+  if(btn) btn.disabled = true;
+  var d = new Date(); var local = new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  var stamp = local.toISOString().slice(0,16).replace("T","_").replace(":","");
+  var dataBlob, appBlob;
+  try {
+    dataBlob = new Blob([buildBackupHtml(backupPayload())], {type:"text/html"});
+    appBlob = new Blob([buildBackupHtml(null)], {type:"text/html"});
+  } catch(e){ if(btn) btn.disabled=false; toast("バックアップの作成に失敗しました"); return; }
+  var dataSaved = false;
+  /* 1つ目：データ入りのバックアップ（パソコンならダブルクリックで非常用アプリとしても開ける） */
+  saveFile("桜電設_バックアップ_" + stamp + ".html", dataBlob).then(function(res){
+    if(!(res && res.status)) return null;
+    dataSaved = true;
+    if(!window.SAKURA_OFFLINE && db){ db.doc("settings/company").update({lastBackupAt: Date.now()}).catch(function(){}); }
+    toast("データを保存しました。続けてアプリ本体（GitHub用）を保存します");
+    /* 2つ目：GitHubに置く用のアプリ本体（データは入っていない）。GitHub Pagesでは index.html という名前が必要 */
+    return new Promise(function(r){ setTimeout(r, 600); }).then(function(){ return saveFile("index.html", appBlob); });
+  }).then(function(res){
+    if(btn) btn.disabled = false;
+    if(res && res.status) toast("バックアップとアプリ本体（index.html）を保存しました");
+  }).catch(function(err){
+    if(btn) btn.disabled = false;
+    if(err && err.code === "declined"){ if(dataSaved) toast("データは保存済みです（アプリ本体の保存はスキップしました）"); return; }
+    if(err && err.code === "unavailable"){ toast("このビューではファイル保存を利用できません。"); return; }
+    toast(dataSaved ? "データは保存済みです。アプリ本体の保存に失敗しました" : "バックアップの保存に失敗しました");
+  });
+}
+
+/* 非常用アプリ用：Claudeの保存機能の代わりに、この端末のブラウザ内に保存する仕組み。
+   ※この関数は単体で動くように書いてある（バックアップファイルにそのまま埋め込まれる） */
+function offlineShim(){
+  var dataEl = document.getElementById("sakura-data");
+  var src = dataEl ? JSON.parse(dataEl.textContent) : null;
+  var KEY = src ? "sakura-offline:" + src.exportedAt : "sakura-web:v1";
+  var store = null, meta = null, canSave = true;
+  try { var saved = localStorage.getItem(KEY); if(saved){ var o = JSON.parse(saved); store = o.docs; meta = o.meta || null; } } catch(e){ canSave = false; }
+  if(!store) store = src ? JSON.parse(JSON.stringify(src.docs)) : {};
+  if(!meta) meta = { exportedAt: src ? src.exportedAt : null };
+  window.SAKURA_OFFLINE = { exportedAt: meta.exportedAt, site: !src };
+  var listeners = [];
+  function clone(o){ return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
+  function persist(){ if(!canSave) return; try { localStorage.setItem(KEY, JSON.stringify({docs:store, meta:meta})); } catch(e){ canSave = false; } }
+  function newId(){ return "L" + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function docSnap(path){ return { exists: Object.prototype.hasOwnProperty.call(store, path), id: path.split("/").pop(), data: function(){ return clone(store[path]); } }; }
+  function colSnap(q){
+    var pre = q.col + "/";
+    var list = Object.keys(store).filter(function(k){ return k.indexOf(pre)===0 && k.slice(pre.length).indexOf("/")===-1; })
+      .map(function(k){ return { id:k.slice(pre.length), _d:store[k] }; });
+    if(q.field){ list.sort(function(a,b){ var x=a._d[q.field]||0, y=b._d[q.field]||0; return q.dir==="desc" ? (y>x?1:y<x?-1:0) : (x>y?1:x<y?-1:0); }); }
+    if(q.lim) list = list.slice(0, q.lim);
+    return { docs: list.map(function(it){ return { id: it.id, data: function(){ return clone(it._d); } }; }) };
+  }
+  function changed(){ persist(); setTimeout(function(){ listeners.slice().forEach(function(l){ try { l.cb(l.q ? colSnap(l.q) : docSnap(l.path)); } catch(e){} }); }, 0); }
+  function listen(entry){ listeners.push(entry); setTimeout(function(){ entry.cb(entry.q ? colSnap(entry.q) : docSnap(entry.path)); }, 0); return function(){ var i = listeners.indexOf(entry); if(i>-1) listeners.splice(i,1); }; }
+  function docRef(path){ return {
+    id: path.split("/").pop(),
+    get: function(){ return Promise.resolve(docSnap(path)); },
+    set: function(d){ store[path] = clone(d); changed(); return Promise.resolve(); },
+    update: function(d){ store[path] = Object.assign({}, store[path] || {}, clone(d)); changed(); return Promise.resolve(); },
+    delete: function(){ delete store[path]; changed(); return Promise.resolve(); },
+    onSnapshot: function(cb){ return listen({ path:path, cb:cb }); }
+  }; }
+  function query(q){ return {
+    orderBy: function(f, dir){ return query(Object.assign({}, q, { field:f, dir:dir||"asc" })); },
+    limit: function(n){ return query(Object.assign({}, q, { lim:n })); },
+    get: function(){ return Promise.resolve(colSnap(q)); },
+    onSnapshot: function(cb){ return listen({ q:q, cb:cb }); }
+  }; }
+  var db = {
+    doc: function(path){ return docRef(path); },
+    collection: function(col){ var base = query({ col:col }); base.add = function(d){ var id = newId(); store[col+"/"+id] = clone(d); changed(); return Promise.resolve(docRef(col+"/"+id)); }; base.doc = function(id){ return docRef(col+"/"+(id||newId())); }; return base; }
+  };
+  var downloads = { save: function(opt){
+    var url = URL.createObjectURL(opt.data);
+    var a = document.createElement("a"); a.href = url; a.download = opt.filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    return Promise.resolve({ status:"saved" });
+  } };
+  window.claude = { use: function(name){ return Promise.resolve(name==="db" ? db : name==="downloads" ? downloads : null); } };
+  function hasDocs(){ return Object.keys(store).some(function(k){ return /^(projects|quotes|invoices|customers)\//.test(k); }); }
+  function parseBackup(text){
+    text = String(text||"").trim();
+    var obj;
+    if(text.charAt(0) === "{") obj = JSON.parse(text);
+    else {
+      var m = text.match(/<script type="application\/json" id="sakura-data">([\s\S]*?)<\/script>/);
+      if(!m) throw new Error("no data");
+      obj = JSON.parse(m[1]);
+    }
+    if(!obj || obj.format !== "sakura-densetsu-backup" || !obj.docs) throw new Error("bad format");
+    return obj;
+  }
+  function fmtStamp(iso){ if(!iso) return ""; var d = new Date(iso); return d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日 "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); }
+  var bar = null;
+  function drawBar(){
+    if(!bar) return;
+    var msg;
+    if(!hasDocs() && !meta.exportedAt) msg = "データがまだ入っていません。右のボタンからバックアップファイルを読み込んでください。";
+    else msg = "Claudeなし版（" + fmtStamp(meta.exportedAt) + " 時点のバックアップ）。ここでの変更は、この端末のこのブラウザの中にだけ保存されます。";
+    if(!canSave) msg += "※この環境では保存できないため、閉じると変更は消えます。";
+    bar.innerHTML = "";
+    var t = document.createElement("span"); t.textContent = msg; bar.appendChild(t);
+    var lb = document.createElement("label");
+    lb.textContent = "バックアップを読み込む";
+    lb.style.cssText = "display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:#fff;color:#7A520C;font-weight:700;cursor:pointer;white-space:nowrap;";
+    var inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".html,.htm,.json,text/html,application/json"; inp.style.display = "none";
+    inp.addEventListener("change", function(){ if(inp.files && inp.files[0]) importFile(inp.files[0]); inp.value = ""; });
+    lb.appendChild(inp); bar.appendChild(lb);
+  }
+  function importFile(file){
+    var r = new FileReader();
+    r.onload = function(){
+      var obj;
+      try { obj = parseBackup(r.result); }
+      catch(e){ alert("バックアップファイルとして読み込めませんでした。「桜電設_バックアップ_〜.html」のファイルを選んでください。"); return; }
+      if(hasDocs() && !confirm("今この端末に入っているデータを、" + fmtStamp(obj.exportedAt) + " 時点のバックアップで置き換えます。よろしいですか？")) return;
+      store = JSON.parse(JSON.stringify(obj.docs));
+      meta = { exportedAt: obj.exportedAt };
+      window.SAKURA_OFFLINE.exportedAt = obj.exportedAt;
+      changed(); drawBar();
+      location.hash = "#/home";
+      setTimeout(function(){ alert("読み込みました（" + fmtStamp(obj.exportedAt) + " 時点のデータ）"); }, 50);
+    };
+    r.onerror = function(){ alert("ファイルを読み込めませんでした"); };
+    r.readAsText(file);
+  }
+  document.addEventListener("DOMContentLoaded", function(){
+    bar = document.createElement("div");
+    bar.style.cssText = "position:sticky;top:0;z-index:60;background:#9C6A12;color:#fff;font-size:12.5px;line-height:1.6;padding:8px 14px;text-align:center;";
+    document.body.insertBefore(bar, document.body.firstChild);
+    drawBar();
+  });
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  var s = STATE.settings || DEFAULT_SETTINGS;
+  return ''
+  + '<div class="page-head"><div><div class="page-title">自社情報</div><div class="page-sub">見積書・請求書に印字される桒電設の情報です</div></div></div>'
+  + '<form class="card" id="settings-form">'
+    + '<div class="field-row">'
+      + '<div class="field"><label>屋号・会社名</label><input class="input" name="companyName" value="'+escAttr(s.companyName)+'"></div>'
+      + '<div class="field"><label>代表者名</label><input class="input" name="repName" value="'+escAttr(s.repName)+'"></div>'
+    + '</div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>郵便番号</label><input class="input" name="postalCode" value="'+escAttr(s.postalCode)+'" placeholder="123-4567"></div>'
+      + '<div class="field"><label>電話番号</label><input class="input" name="phone" value="'+escAttr(s.phone)+'"></div>'
+    + '</div>'
+    + '<div class="field"><label>メールアドレス（任意）</label><input class="input" type="email" name="email" value="'+escAttr(s.email||"")+'" placeholder="例：info@example.com"></div>'
+    + '<div class="field"><label>住所</label><input class="input" name="address" value="'+escAttr(s.address)+'"></div>'
+    + '<div class="field"><label>インボイス登録番号</label><input class="input" name="invoiceRegNumber" value="'+escAttr(s.invoiceRegNumber)+'" placeholder="T1234567890123"></div>'
+    + '<div class="field"><label>標準労務単価（1人1日）</label><input class="input" type="number" name="laborRate" value="'+esc(s.laborRate)+'" step="100">'
+      + '<div class="page-sub" style="margin-top:5px;">見積書・請求書の明細で「＋ 労務費(人工)を追加」を押したときに、単価として自動で入力される金額です。</div></div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>見積の有効期限（発行日から何日）</label><input class="input" type="number" name="quoteValidDays" value="'+esc(s.quoteValidDays)+'"></div>'
+      + '<div class="field"><label>請求の支払期限（発行日から何日）</label><input class="input" type="number" name="invoiceDueDays" value="'+esc(s.invoiceDueDays)+'"></div>'
+    + '</div>'
+    + '<h3 style="margin:18px 0 10px;font-size:14px;color:var(--muted);">請求書の振込先</h3>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>金融機関名</label><input class="input" name="bankName" value="'+escAttr(s.bankName)+'"></div>'
+      + '<div class="field"><label>支店名</label><input class="input" name="branchName" value="'+escAttr(s.branchName)+'"></div>'
+    + '</div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>口座種別</label><select class="input" name="accountType"><option value="普通"'+(s.accountType==="普通"?" selected":"")+'>普通</option><option value="当座"'+(s.accountType==="当座"?" selected":"")+'>当座</option></select></div>'
+      + '<div class="field"><label>口座番号</label><input class="input" name="accountNumber" value="'+escAttr(s.accountNumber)+'"></div>'
+    + '</div>'
+    + '<div class="field"><label>口座名義</label><input class="input" name="accountHolder" value="'+escAttr(s.accountHolder)+'"></div>'
+    + '<div class="editor-actions"><button type="submit" class="btn">保存する</button></div>'
+  + '</form>'
+  + '<div class="card" style="margin-top:20px;">'
+    + '<h3 style="margin:0 0 8px;font-size:15px;">バックアップ（非常用アプリ）</h3>'
+    + '<div class="page-sub" style="margin:0 0 12px;line-height:1.7;">押すと2つのファイルを続けて保存します。<br>①「桜電設_バックアップ_日付.html」…今のデータ全部。パソコンならダブルクリックでそのまま非常用アプリとして開けます。iCloud Drive・Googleドライブ・USBなどにしまっておいてください。<br>②「index.html」…データの入っていない最新のアプリ本体。GitHubに上げておくと、iPhoneのSafariでも開けて、①を読み込めば同じように使えます。</div>'
+    + '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><button type="button" class="btn" data-action="backup">今すぐバックアップ</button>'
+    + '<span class="page-sub" style="margin:0;">最終バックアップ：'+(s.lastBackupAt ? fmtDate(new Date(s.lastBackupAt - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)) : 'まだありません')+'</span></div>'
+  + '</div>';
+}
+function saveSettings(form){
+  var data = {};
+  ["companyName","repName","postalCode","phone","email","address","invoiceRegNumber","bankName","branchName","accountType","accountNumber","accountHolder"].forEach(function(f){
+    data[f] = qs("[name="+f+"]",form).value.trim();
+  });
+  data.quoteValidDays = parseInt(qs("[name=quoteValidDays]",form).value,10)||30;
+  data.invoiceDueDays = parseInt(qs("[name=invoiceDueDays]",form).value,10)||30;
+  data.laborRate = parseInt(qs("[name=laborRate]",form).value,10)||0;
+  db.doc("settings/company").update(data).then(function(){ toast("設定を保存しました"); });
+}
+
+/* ---------- helpers ---------- */
+function escAttr(s){ return esc(s); }
+
+/* ---------- event delegation ---------- */
+document.addEventListener("click", function(e){
+  var navBtn = e.target.closest("[data-nav]");
+  if(navBtn){ go("#/"+navBtn.dataset.nav); return; }
+  var navHref = e.target.closest("[data-nav-href]");
+  if(navHref){ go(navHref.dataset.navHref); return; }
+  var rowEl = e.target.closest("tr[data-href]");
+  if(rowEl && !e.target.closest("a")){ go(rowEl.dataset.href); return; }
+
+  var actionEl = e.target.closest("[data-action]");
+  if(!actionEl) return;
+  var action = actionEl.dataset.action;
+  if(action==="add-item-row"){
+    var body = actionEl.closest(".card").querySelector("tbody[id$='-items']");
+    insertRowAfterFocus(body, itemRowHTML());
+    var scope = actionEl.closest(".doc-editor");
+    updatePreview(scope.dataset.kind, qs("form",scope));
+  } else if(action==="add-heading-row"){
+    var bodyH = actionEl.closest(".card").querySelector("tbody[id$='-items']");
+    insertRowAfterFocus(bodyH, headingRowHTML());
+    var scopeH = actionEl.closest(".doc-editor");
+    updatePreview(scopeH.dataset.kind, qs("form",scopeH));
+  } else if(action==="remove-item-row"){
+    var row = actionEl.closest(".item-row");
+    var scope2 = actionEl.closest(".doc-editor");
+    row.remove();
+    updatePreview(scope2.dataset.kind, qs("form",scope2));
+  } else if(action==="delete-project"){ deleteProject(actionEl.dataset.id); }
+  else if(action==="delete-quote"){ deleteCurrentDoc("quote", actionEl.dataset.id); }
+  else if(action==="delete-invoice"){ deleteCurrentDoc("invoice", actionEl.dataset.id); }
+  else if(action==="print-doc"){ printCurrentDoc(actionEl.dataset.kind); }
+  else if(action==="backup"){ runBackup(actionEl); }
+  else if(action==="delete-customer"){ deleteCustomer(actionEl); }
+  else if(action==="save-as-customer"){
+    var pf = actionEl.closest("form");
+    var nm = qs("[name=customerName]",pf).value.trim();
+    if(!nm){ toast("先に顧客名を入力してください"); return; }
+    var dup = STATE.customers.filter(function(c){ return (c.name||"").trim()===nm; })[0];
+    var info = qs("[name=contactInfo]",pf).value.trim();
+    var cdata = { name:nm, honorific: qs("[name=honorific]",pf).value || (qs("[name=contactPerson]",pf).value.trim()?"御中":"様"),
+      postalCode: qs("[name=postalCode]",pf).value.trim(), address: qs("[name=address]",pf).value.trim(),
+      contactPerson: qs("[name=contactPerson]",pf).value.trim(), phone: info, email:"", memo:"" };
+    if(dup){ delete cdata.email; delete cdata.memo; }
+    saveDoc("customers", dup?dup.id:null, cdata).then(function(cid){
+      qs("[name=customerId]",pf).value = cid;
+      toast(dup ? "取引先「"+nm+"」の情報を更新しました" : "取引先「"+nm+"」を登録しました");
+    });
+  }
+  else if(action==="mark-ordered"){
+    var pid = actionEl.dataset.project;
+    actionEl.disabled = true;
+    saveDoc("projects", pid, {status:"受注"}).then(function(){
+      toast("案件を「受注」にしました");
+      if(actionEl.parentNode) actionEl.parentNode.removeChild(actionEl);
+    }).catch(function(){ actionEl.disabled = false; toast("受注にできませんでした。もう一度押してください"); });
+  }
+});
+
+document.addEventListener("input", function(e){
+  var scope = e.target.closest(".doc-editor");
+  if(scope){ updatePreview(scope.dataset.kind, qs("form",scope)); return; }
+  if(e.target.id==="project-search" || e.target.id==="project-status-filter") filterProjects();
+  if(e.target.id==="doc-search-quote") filterDocs("quote");
+  if(e.target.id==="doc-search-invoice") filterDocs("invoice");
+});
+
+document.addEventListener("change", function(e){
+  if(e.target.id==="quote-picker"){
+    var qid = e.target.value;
+    var form = e.target.closest("form");
+    var q = findById(STATE.quotes, qid);
+    if(q){
+      var body = qs("#invoice-items", form);
+      body.innerHTML = (q.items||[]).map(rowHTML).join("");
+      updatePreview("invoice", form);
+    }
+  } else if(e.target.id==="customer-picker"){
+    var cf = e.target.closest("form");
+    var cc = findById(STATE.customers, e.target.value);
+    if(cc){ applyCustomerToProjectForm(cf, cc); toast("「"+customerLabel(cc)+"」の情報を入れました"); }
+    else if(cf){ qs("[name=customerId]",cf).value=""; }
+  } else if(e.target.id==="project-picker"){
+    var scope = e.target.closest(".doc-editor");
+    if(scope) updatePreview(scope.dataset.kind, qs("form",scope));
+  } else if(e.target.classList && e.target.classList.contains("template-picker")){
+    var val = e.target.value;
+    if(val){ insertTemplate(val, e.target.closest("form")); }
+    e.target.value = "";
+  }
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.key !== "Enter") return;
+  if(e.isComposing || e.keyCode === 229) return;
+  var form = e.target.closest("#quote-form, #invoice-form, #project-form, #settings-form, #customer-form");
+  if(!form || e.target.tagName === "TEXTAREA") return;
+  e.preventDefault();
+  var cls = e.target.classList;
+  if(!cls) return;
+  var row = e.target.closest(".item-row");
+  if(cls.contains("item-name")){
+    if(row) qs(".item-qty", row).focus();
+  } else if(cls.contains("item-qty")){
+    if(row) qs(".item-unit", row).focus();
+  } else if(cls.contains("item-unit")){
+    if(row) qs(".item-price", row).focus();
+  } else if(cls.contains("item-price") || cls.contains("item-heading-name")){
+    var body = e.target.closest("tbody");
+    if(!body) return;
+    var newRow = row ? (function(){ row.insertAdjacentHTML("afterend", itemRowHTML()); return row.nextElementSibling; })() : (function(){ body.insertAdjacentHTML("beforeend", itemRowHTML()); return body.lastElementChild; })();
+    lastFocusedRow = newRow;
+    var scope = form.closest(".doc-editor");
+    if(scope) updatePreview(scope.dataset.kind, form);
+    var nameField = qs(".item-name", newRow);
+    if(nameField) nameField.focus();
+  }
+});
+
+/* 明細の行・見出しをドラッグで並び替え（マウス・タッチ両対応） */
+var dragState = null;
+document.addEventListener("pointerdown", function(e){
+  var h = e.target.closest(".drag-handle");
+  if(!h) return;
+  var row = h.closest(".item-row");
+  if(!row) return;
+  e.preventDefault();
+  dragState = { row: row, body: row.parentNode };
+  row.classList.add("dragging");
+  document.body.classList.add("is-dragging");
+  try{ h.setPointerCapture(e.pointerId); }catch(_){}
+});
+document.addEventListener("pointermove", function(e){
+  if(!dragState) return;
+  e.preventDefault();
+  var rows = qsa(".item-row", dragState.body).filter(function(r){ return r!==dragState.row; });
+  var before = null;
+  for(var i=0;i<rows.length;i++){
+    var rc = rows[i].getBoundingClientRect();
+    if(e.clientY < rc.top + rc.height/2){ before = rows[i]; break; }
+  }
+  if(before){ if(dragState.row.nextElementSibling!==before) dragState.body.insertBefore(dragState.row, before); }
+  else if(dragState.body.lastElementChild!==dragState.row){ dragState.body.appendChild(dragState.row); }
+  if(e.clientY < 70) window.scrollBy(0,-14);
+  else if(e.clientY > window.innerHeight - 70) window.scrollBy(0,14);
+}, {passive:false});
+function endRowDrag(){
+  if(!dragState) return;
+  dragState.row.classList.remove("dragging");
+  document.body.classList.remove("is-dragging");
+  var scope = dragState.body.closest(".doc-editor");
+  dragState = null;
+  if(scope) updatePreview(scope.dataset.kind, qs("form",scope));
+}
+document.addEventListener("pointerup", endRowDrag);
+document.addEventListener("pointercancel", endRowDrag);
+
+document.addEventListener("submit", function(e){
+  e.preventDefault();
+  var form = e.target;
+  if(form.id==="project-form") saveProject(form);
+  else if(form.id==="customer-form") saveCustomer(form);
+  else if(form.id==="quote-form") saveCurrentDoc("quote", form);
+  else if(form.id==="invoice-form") saveCurrentDoc("invoice", form);
+  else if(form.id==="settings-form") saveSettings(form);
+});
+
+initApp();
+})();
+</script></body></html>
