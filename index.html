@@ -3,25 +3,34 @@
     box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px);
     padding-bottom:env(safe-area-inset-bottom,0px);
-    --ink:#1B2430; --paper:#F2F5F3; --surface:#FFFFFF;
-    --sakura:#B0446A;
-    --sakura-fill:#A83D5E; --sakura-fill-dk:#7C2C44;
-    --ground:#2F6647; --caution:#9C6A12; --progress:#2E5A79; --navy:#1B2430;
-    --line:#DCE2DE; --muted:#667079; --danger:#B0382C;
+    /* DeskStack テーマ：アイコンの「紺×シアン→紫」に合わせた配色（帳票の見た目には影響しない） */
+    --ink:#151B2E; --paper:#F1F3F9; --surface:#FFFFFF;
+    --sakura:#5145D8;
+    --sakura-fill:#4F46E5; --sakura-fill-dk:#3730A3;
+    --accent-grad:linear-gradient(135deg,#0E7490 0%,#4F46E5 55%,#7C3AED 100%);
+    --btn-grad:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+    --btn-grad-dk:linear-gradient(135deg,#3730A3 0%,#5B21B6 100%);
+    --hover-tint:rgba(79,70,229,.06);
+    --ground:#2F6647; --caution:#5B6478;
+    --st-quote:#0891B2; --st-quote-fg:#0E7490;
+    --st-bill:#22D3EE; --st-bill-bg:#CFFAFE; --st-bill-fg:#155E75; --progress:#0E7490; --navy:#0B1020;
+    --line:#DDE2EE; --muted:#626A7E; --danger:#B0382C;
     --font-display:'Shippori Mincho',serif;
     --font-body:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif;
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
-      --ink:#E9ECEC; --paper:#15191C; --surface:#1D2226;
-      --sakura:#EBA0B6;
-      --line:#2B3237; --muted:#96A0A6; --danger:#E07364;
+      --ink:#E6E9F2; --paper:#0B0F1A; --surface:#141A29;
+      --sakura:#A5B4FC; --hover-tint:rgba(129,140,248,.10);
+      --st-quote:#22D3EE; --st-quote-fg:#67E8F9; --st-bill-bg:rgba(34,211,238,.18); --st-bill-fg:#A5F3FC;
+      --line:#262E42; --muted:#98A1B5; --danger:#E07364;
     }
   }
   :root[data-theme="dark"]{
-    --ink:#E9ECEC; --paper:#15191C; --surface:#1D2226;
-    --sakura:#EBA0B6;
-    --line:#2B3237; --muted:#96A0A6; --danger:#E07364;
+    --ink:#E6E9F2; --paper:#0B0F1A; --surface:#141A29;
+    --sakura:#A5B4FC; --hover-tint:rgba(129,140,248,.10);
+    --st-quote:#22D3EE; --st-quote-fg:#67E8F9; --st-bill-bg:rgba(34,211,238,.18); --st-bill-fg:#A5F3FC;
+    --line:#262E42; --muted:#98A1B5; --danger:#E07364;
   }
   *,*::before,*::after{box-sizing:inherit;}
   html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);}
@@ -38,7 +47,7 @@
 
   .app-shell{min-height:100%;display:flex;}
   .sidebar{
-    width:216px;flex:0 0 216px;background:var(--navy);color:#F2F5F3;
+    width:216px;flex:0 0 216px;background:linear-gradient(180deg,#121A33 0%,#0B1020 60%);color:#EEF1FA;border-right:1px solid rgba(124,58,237,.25);
     position:sticky;top:0;align-self:flex-start;min-height:100vh;
     padding:22px 14px;display:flex;flex-direction:column;gap:4px;
   }
@@ -48,8 +57,8 @@
     display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;
     color:#C7CDD1;text-decoration:none;font-size:14px;font-weight:500;cursor:pointer;border:none;background:none;text-align:left;width:100%;
   }
-  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
-  .nav-item.active{background:var(--sakura-fill);color:#fff;}
+  .nav-item:hover{background:rgba(129,140,248,.12);color:#fff;}
+  .nav-item.active{background:var(--accent-grad);color:#fff;box-shadow:0 4px 14px rgba(79,70,229,.35);}
   .nav-icon{width:18px;text-align:center;font-size:15px;}
   .sidebar-foot{margin-top:auto;padding:10px 12px;font-size:11.5px;color:#7C868C;line-height:1.5;}
 
@@ -60,9 +69,9 @@
 
   .btn{
     display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:5px;border:1px solid transparent;
-    background:var(--sakura-fill);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap;
+    background:var(--btn-grad);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap;
   }
-  .btn:hover{background:var(--sakura-fill-dk);}
+  .btn:hover{background:var(--btn-grad-dk);}
   .btn.secondary{background:transparent;border-color:var(--line);color:var(--ink);font-weight:500;}
   .btn.secondary:hover{border-color:var(--sakura);color:var(--sakura);}
   .btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);font-weight:500;}
@@ -72,15 +81,20 @@
   .btn-icon:hover{color:var(--danger);border-color:var(--danger);}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;}
-  .banner{background:var(--surface);border:1px solid var(--caution);border-left:4px solid var(--caution);border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .banner{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--sakura-fill);border-radius:6px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
 
   .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px;}
-  .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;border-left:3px solid var(--line);}
+  /* ホームの6項目：アイコンの「シアン→青→紫」を仕事の流れの順に割り当て */
+  :root{ --bar-1:#22D3EE; --bar-2:#0284C7; --bar-3:#4F46E5; --bar-4:#A855F7; --bar-5:#5B21B6; --bar-6:linear-gradient(180deg,#22D3EE 0%,#4F46E5 55%,#A855F7 100%); }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --bar-2:#2563EB; --bar-3:#818CF8; --bar-4:#A855F7; --bar-5:#7C3AED; } }
+  :root[data-theme="dark"]{ --bar-2:#2563EB; --bar-3:#818CF8; --bar-4:#A855F7; --bar-5:#7C3AED; }
+  .stat-card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px 16px 22px;}
+  .stat-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--bar,var(--line));}
   .stat-card[data-nav-href]{cursor:pointer;}
   .stat-card[data-nav-href]:hover{border-color:var(--sakura);}
   .stat-card .n{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
   .stat-card .l{font-size:12.5px;color:var(--muted);margin-top:2px;}
-  .stat-card.accent{border-left-color:var(--sakura);}
+  .stat-card.accent{--bar:var(--bar-6);}
   .stat-card.accent .n{color:var(--sakura);}
 
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
@@ -96,7 +110,7 @@
   .list-table th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--line);}
   .list-table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
   .list-table tbody tr{cursor:pointer;}
-  .list-table tr:hover td{background:rgba(168,61,94,.05);}
+  .list-table tr:hover td{background:var(--hover-tint);}
   .list-table a.row-link{color:var(--ink);text-decoration:none;font-weight:500;}
   .list-table a.row-link:hover{color:var(--sakura);}
   .list-table td.truncate-cell{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -104,13 +118,17 @@
   .empty-state{padding:48px 20px;text-align:center;color:var(--muted);}
   .empty-state .btn{margin-top:14px;}
 
-  .badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}
-  .badge-見積中{background:var(--caution);}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.4;color:#fff;white-space:nowrap;}
+  /* 見積中：まだ確定していない＝枠線だけ＋白抜きの丸 */
+  .badge-見積中{background:transparent;color:var(--st-quote-fg);box-shadow:inset 0 0 0 1.5px var(--st-quote);}
+  .badge-見積中::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;box-sizing:border-box;flex:none;}
   .badge-受注{background:var(--sakura-fill);}
   .badge-施工中{background:var(--progress);}
   .badge-請求済み{background:var(--navy);color:#fff;}
   .badge-入金済み{background:var(--ground);}
-  .badge-請求前{background:var(--danger);}
+  /* 請求前：やることが残っている＝水色の塗り＋「!」マーク */
+  .badge-請求前{background:var(--st-bill-bg);color:var(--st-bill-fg);box-shadow:inset 0 0 0 1.5px var(--st-bill);}
+  .badge-請求前::before{content:"!";display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--st-bill-fg);color:var(--surface);font-size:10px;font-weight:900;line-height:1;flex:none;}
 
   .editor-grid{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:24px;align-items:start;}
   @media (max-width:980px){ .editor-grid{grid-template-columns:1fr;} }
@@ -124,7 +142,7 @@
   .item-table .col-name{width:auto;}
   .item-table .col-qty{width:64px;} .item-table .col-unit{width:64px;} .item-table .col-price{width:100px;} .item-table .col-del{width:30px;}
   .item-table tr[data-type="heading"] td{padding-top:10px;}
-  .item-heading-name{font-weight:700;background:rgba(168,61,94,.07);}
+  .item-heading-name{font-weight:700;background:rgba(79,70,229,.08);}
 
   .paper-frame{position:sticky;top:20px;overflow:hidden;}
   .doc-pages{width:210mm;transform-origin:top left;display:flex;flex-direction:column;gap:14px;}
@@ -139,7 +157,7 @@
   .item-table .col-drag{width:22px;padding-left:0;padding-right:0;}
   .drag-handle{display:inline-block;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--muted);font-size:14px;letter-spacing:-3px;padding:7px 4px;line-height:1;}
   .drag-handle:hover{color:var(--sakura);}
-  .item-row.dragging td{background:rgba(168,61,94,.10);}
+  .item-row.dragging td{background:rgba(79,70,229,.12);}
   .item-row.dragging .drag-handle{cursor:grabbing;color:var(--sakura);}
   body.is-dragging{user-select:none;-webkit-user-select:none;cursor:grabbing;}
   .detail-section{margin-top:22px;}
@@ -147,7 +165,7 @@
   .mini-list{border:1px solid var(--line);border-radius:6px;overflow:hidden;}
   .mini-list a{display:flex;justify-content:space-between;padding:11px 14px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line);font-size:13.5px;}
   .mini-list a:last-child{border-bottom:none;}
-  .mini-list a:hover{background:rgba(168,61,94,.06);}
+  .mini-list a:hover{background:var(--hover-tint);}
   .mini-list .mn{color:var(--muted);font-size:12px;}
 
   .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:6px;font-size:13.5px;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:80;opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;}
@@ -219,7 +237,7 @@
     <button class="nav-item" data-nav="quotes"><span class="nav-icon">▥</span>見積書</button>
     <button class="nav-item" data-nav="invoices"><span class="nav-icon">▦</span>請求書</button>
     <button class="nav-item" data-nav="customers"><span class="nav-icon">☷</span>取引先</button>
-    <button class="nav-item" data-nav="settings"><span class="nav-icon">⚙</span>自社情報</button>
+    <button class="nav-item" data-nav="settings"><span class="nav-icon">⚙</span>設定</button>
     <div class="sidebar-foot">データはこのアプリ内に自動保存されます。</div>
   </nav>
   <main class="main" id="main">
@@ -300,7 +318,7 @@
     var t = document.createElement("span"); t.textContent = msg; bar.appendChild(t);
     var lb = document.createElement("label");
     lb.textContent = "バックアップを読み込む";
-    lb.style.cssText = "display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:#fff;color:#7A520C;font-weight:700;cursor:pointer;white-space:nowrap;";
+    lb.style.cssText = "display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:#fff;color:#4338CA;font-weight:700;cursor:pointer;white-space:nowrap;";
     var inp = document.createElement("input");
     inp.type = "file"; inp.accept = ".html,.htm,.json,text/html,application/json"; inp.style.display = "none";
     inp.addEventListener("change", function(){ if(inp.files && inp.files[0]) importFile(inp.files[0]); inp.value = ""; });
@@ -325,7 +343,7 @@
   }
   document.addEventListener("DOMContentLoaded", function(){
     bar = document.createElement("div");
-    bar.style.cssText = "position:sticky;top:0;z-index:60;background:#9C6A12;color:#fff;font-size:12.5px;line-height:1.6;padding:8px 14px;text-align:center;";
+    bar.style.cssText = "position:sticky;top:0;z-index:60;background:linear-gradient(135deg,#0E7490 0%,#4F46E5 55%,#7C3AED 100%);color:#fff;font-size:12.5px;line-height:1.6;padding:8px 14px;text-align:center;";
     document.body.insertBefore(bar, document.body.firstChild);
     drawBar();
   });
@@ -556,18 +574,18 @@ function renderHome(){
   + '<div class="page-head"><div><div class="page-title">ホーム</div><div class="page-sub">桜電設の見積・請求のいまが一目でわかります</div></div>'
   + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn secondary" data-nav-href="#/projects/new">+ 新規案件</button><button class="btn" data-nav-href="#/quotes/new">+ 新規見積書</button><button class="btn" data-nav-href="#/invoices/new">+ 新規請求書</button></div></div>'
   + '<div class="stat-grid">'
-    + statCard(counts["見積中"],"見積中","caution","#/projects?status="+encodeURIComponent("見積中"))
-    + statCard(counts["受注"],"受注","sakura","#/projects?status="+encodeURIComponent("受注"))
-    + statCard(counts["施工中"],"施工中","progress","#/projects?status="+encodeURIComponent("施工中"))
-    + statCard(counts["請求前"],"請求前（未書き出し）","danger","#/projects?status="+encodeURIComponent("請求前"))
-    + statCard(counts["請求済み"],"請求済み（未入金）","navy","#/projects?status="+encodeURIComponent("請求済み"))
+    + statCard(counts["見積中"],"見積中","bar-1","#/projects?status="+encodeURIComponent("見積中"))
+    + statCard(counts["受注"],"受注","bar-2","#/projects?status="+encodeURIComponent("受注"))
+    + statCard(counts["施工中"],"施工中","bar-3","#/projects?status="+encodeURIComponent("施工中"))
+    + statCard(counts["請求前"],"請求前（未書き出し）","bar-4","#/projects?status="+encodeURIComponent("請求前"))
+    + statCard(counts["請求済み"],"請求済み（未入金）","bar-5","#/projects?status="+encodeURIComponent("請求済み"))
     + '<div class="stat-card accent" data-nav-href="#/projects?status='+encodeURIComponent("請求済み")+'"><div class="n">'+yen(unpaidTotal)+'</div><div class="l">未入金の請求額合計</div></div>'
   + '</div>'
   + pendingHtml
   + '<div class="detail-section"><h3>最近の案件</h3>'+recentHtml+'</div>';
 }
 function statCard(n,label,color,href){
-  return '<div class="stat-card"'+(href?' data-nav-href="'+href+'"':'')+' style="border-left-color:var(--'+color+')"><div class="n">'+(n||0)+'</div><div class="l">'+esc(label)+'</div></div>';
+  return '<div class="stat-card"'+(href?' data-nav-href="'+href+'"':'')+' style="--bar:var(--'+color+')"><div class="n">'+(n||0)+'</div><div class="l">'+esc(label)+'</div></div>';
 }
 function statusBadge(status){ return '<span class="badge badge-'+esc(status||"見積中")+'">'+esc(status||"見積中")+'</span>'; }
 function docTotal(items){ var sub=(items||[]).reduce(function(s,it){ if(it && it.type==="heading") return s; return s+(Number(it.qty)||0)*(Number(it.price)||0);},0); return sub + Math.round(sub*0.1); }
@@ -1548,7 +1566,7 @@ function offlineShim(){
     var t = document.createElement("span"); t.textContent = msg; bar.appendChild(t);
     var lb = document.createElement("label");
     lb.textContent = "バックアップを読み込む";
-    lb.style.cssText = "display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:#fff;color:#7A520C;font-weight:700;cursor:pointer;white-space:nowrap;";
+    lb.style.cssText = "display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:#fff;color:#4338CA;font-weight:700;cursor:pointer;white-space:nowrap;";
     var inp = document.createElement("input");
     inp.type = "file"; inp.accept = ".html,.htm,.json,text/html,application/json"; inp.style.display = "none";
     inp.addEventListener("change", function(){ if(inp.files && inp.files[0]) importFile(inp.files[0]); inp.value = ""; });
@@ -1573,7 +1591,7 @@ function offlineShim(){
   }
   document.addEventListener("DOMContentLoaded", function(){
     bar = document.createElement("div");
-    bar.style.cssText = "position:sticky;top:0;z-index:60;background:#9C6A12;color:#fff;font-size:12.5px;line-height:1.6;padding:8px 14px;text-align:center;";
+    bar.style.cssText = "position:sticky;top:0;z-index:60;background:linear-gradient(135deg,#0E7490 0%,#4F46E5 55%,#7C3AED 100%);color:#fff;font-size:12.5px;line-height:1.6;padding:8px 14px;text-align:center;";
     document.body.insertBefore(bar, document.body.firstChild);
     drawBar();
   });
@@ -1583,8 +1601,9 @@ function offlineShim(){
 function renderSettings(){
   var s = STATE.settings || DEFAULT_SETTINGS;
   return ''
-  + '<div class="page-head"><div><div class="page-title">自社情報</div><div class="page-sub">見積書・請求書に印字される桒電設の情報です</div></div></div>'
+  + '<div class="page-head"><div><div class="page-title">設定</div><div class="page-sub">自社情報やバックアップの設定です</div></div></div>'
   + '<form class="card" id="settings-form">'
+    + '<h3 style="margin:0 0 4px;font-size:15px;">自社情報</h3><div class="page-sub" style="margin:0 0 14px;">見積書・請求書に印字される情報です</div>'
     + '<div class="field-row">'
       + '<div class="field"><label>屋号・会社名</label><input class="input" name="companyName" value="'+escAttr(s.companyName)+'"></div>'
       + '<div class="field"><label>代表者名</label><input class="input" name="repName" value="'+escAttr(s.repName)+'"></div>'
