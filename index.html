@@ -85,9 +85,18 @@
 
   .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px;}
   /* ホームの6項目：アイコンの「シアン→青→紫」を仕事の流れの順に割り当て */
-  :root{ --bar-1:#22D3EE; --bar-2:#0284C7; --bar-3:#4F46E5; --bar-4:#A855F7; --bar-5:#5B21B6; --bar-6:linear-gradient(180deg,#22D3EE 0%,#4F46E5 55%,#A855F7 100%); }
-  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --bar-2:#2563EB; --bar-3:#818CF8; --bar-4:#A855F7; --bar-5:#7C3AED; } }
-  :root[data-theme="dark"]{ --bar-2:#2563EB; --bar-3:#818CF8; --bar-4:#A855F7; --bar-5:#7C3AED; }
+  /* 未入金合計のグラデーション（シアン→インディゴ→紫）を均等に5分割。隣同士は明るさも変えて見分けやすく */
+  :root{ --bar-1:#22D3EE; --bar-2:#3B9AF0; --bar-3:#4F46E5; --bar-4:#7C3AED; --bar-5:#A855F7; --bar-6:linear-gradient(180deg,#22D3EE 0%,#4F46E5 55%,#A855F7 100%); }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --bar-3:#6366F1; --bar-4:#8B5CF6; } }
+  :root[data-theme="dark"]{ --bar-3:#6366F1; --bar-4:#8B5CF6; }
+  /* ホームの新規ボタン3つ：3つ並ぶとグラデーションがつながる配色 */
+  .new-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .new-btns .btn{border:none;box-shadow:0 3px 10px rgba(79,70,229,.22);}
+  .new-btns .nb-1{background:linear-gradient(135deg,#0891B2 0%,#0284C7 100%);}
+  .new-btns .nb-2{background:linear-gradient(135deg,#0284C7 0%,#4F46E5 100%);}
+  .new-btns .nb-3{background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);}
+  .new-btns .btn:hover{filter:brightness(.9);}
+  @media (max-width:840px){ .new-btns{display:grid;grid-template-columns:repeat(3,1fr);width:100%;} .new-btns .btn{justify-content:center;padding:10px 4px;font-size:12.5px;} }
   .stat-card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px 16px 22px;}
   .stat-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--bar,var(--line));}
   .stat-card[data-nav-href]{cursor:pointer;}
@@ -167,6 +176,38 @@
   .mini-list a:last-child{border-bottom:none;}
   .mini-list a:hover{background:var(--hover-tint);}
   .mini-list .mn{color:var(--muted);font-size:12px;}
+  /* 案件一覧：顧客ごとにまとめて表示（PC・スマホ共通） */
+  .cust-list{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .cust-row{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:12px 16px;margin:0;border:none;border-bottom:1px solid var(--line);border-radius:0;background:none;text-align:left;color:var(--ink);text-decoration:none;font:inherit;cursor:pointer;}
+  .cust-list > :last-child, .cust-list > .cust-group:last-child:not(.open) > .cust-head{border-bottom:none;}
+  .cust-head{display:flex;align-items:center;border-bottom:1px solid var(--line);}
+  .cust-head .cust-row{flex:1;min-width:0;border-bottom:none;}
+  .cust-edit{flex:none;margin:0 12px 0 0;padding:6px 14px;min-height:34px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--sakura);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .cust-edit:hover{border-color:var(--sakura);background:var(--hover-tint);}
+  .cust-row:hover{background:var(--hover-tint);}
+  .cust-name{flex:1;min-width:0;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cust-count{flex:none;font-size:12px;font-weight:700;color:var(--sakura);background:var(--hover-tint);border-radius:999px;padding:2px 10px;}
+  .chev{flex:none;width:16px;text-align:center;color:var(--muted);transition:transform .15s ease;}
+  .cust-group.open .chev{transform:rotate(180deg);}
+  .cust-projects{display:none;background:var(--paper);border-bottom:1px solid var(--line);}
+  .cust-group:last-child .cust-projects{border-bottom:none;}
+  .cust-group.open .cust-projects{display:block;}
+  .proj-row{display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 16px 10px 30px;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);font-size:14px;}
+  .proj-item{display:flex;align-items:center;border-top:1px solid var(--line);}
+  .proj-item:first-child{border-top:none;}
+  .proj-item .proj-row{flex:1;min-width:0;border-top:none;}
+  .proj-del{flex:none;margin:0 12px 0 4px;padding:5px 12px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .proj-del:hover{color:var(--danger);border-color:var(--danger);}
+  .proj-del.armed{background:var(--danger);border-color:var(--danger);color:#fff;}
+  .proj-row:hover{background:var(--hover-tint);}
+  .client-btn{width:100%;justify-content:space-between;padding:12px 16px;font-size:14.5px;font-weight:700;}
+  .editor-actions .del-btn{margin-left:auto;}
+  .btn.armed{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .btn.secondary.armed{background:var(--danger);color:#fff;}
+  .proj-doc{flex:none;font-size:11px;font-weight:700;color:var(--sakura);border:1px solid currentColor;border-radius:4px;padding:1px 6px;white-space:nowrap;}
+  @media (max-width:840px){ .proj-date{display:none;} .proj-row{padding-left:22px;} }
+  .proj-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .proj-date{flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
 
   .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:6px;font-size:13.5px;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:80;opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
@@ -443,7 +484,7 @@ function subscribeAll(){
   }, function(){ toast("請求書データの取得でエラーが発生しました"); });
 }
 
-var EDITOR_SECTIONS = {"projects-edit":1,"quotes-edit":1,"invoices-edit":1,"customers-edit":1};
+var EDITOR_SECTIONS = {"projects-edit":1,"quotes-edit":1,"invoices-edit":1,"customers-edit":1,"clients-edit":1};
 function onDataChanged(){
   if(!STATE.ready) return;
   var cur = currentRoute;
@@ -502,7 +543,7 @@ function render(){
   qsa(".nav-item").forEach(function(b){ b.classList.toggle("active", b.dataset.nav===section); });
   var main = qs("#main");
   var key = section;
-  if((section==="projects"||section==="quotes"||section==="invoices"||section==="customers") && id) key = section+"-edit";
+  if((section==="projects"||section==="quotes"||section==="invoices"||section==="customers"||section==="clients") && id) key = section+"-edit";
   currentRoute = {section:section,id:id,query:query,key:key};
 
   if(!STATE.ready){ main.innerHTML = '<div class="empty-state">読み込み中…</div>'; return; }
@@ -517,6 +558,7 @@ function render(){
   else if(section==="settings") main.innerHTML = renderSettings();
   else if(section==="customers" && !id) main.innerHTML = renderCustomersList();
   else if(section==="customers" && id) main.innerHTML = renderCustomerForm(id==="new"?null:findById(STATE.customers,id));
+  else if(section==="clients" && id) main.innerHTML = renderClientForm(findById(STATE.projects,id), query.back||"");
   else main.innerHTML = '<div class="empty-state">ページが見つかりません</div>';
 
   if(section==="projects" && !id) filterProjects();
@@ -527,6 +569,17 @@ window.addEventListener("hashchange", render);
 
 function findById(arr,id){ for(var i=0;i<arr.length;i++){ if(arr[i].id===id) return arr[i]; } return null; }
 function latestQuoteFor(projectId){ for(var i=0;i<STATE.quotes.length;i++){ if(STATE.quotes[i].projectId===projectId) return STATE.quotes[i]; } return null; }
+function latestInvoiceFor(projectId){ for(var i=0;i<STATE.invoices.length;i++){ if(STATE.invoices[i].projectId===projectId) return STATE.invoices[i]; } return null; }
+/* 案件一覧の件名を押したときに開く書類：請求の段階なら請求書、それ以外は見積書。なければもう一方、どちらもなければ新規見積書 */
+function docTargetFor(p){
+  var billing = (p.status==="請求前"||p.status==="請求済み"||p.status==="入金済み");
+  var q = latestQuoteFor(p.id), inv = latestInvoiceFor(p.id);
+  var first = billing ? (inv && {href:"#/invoices/"+inv.id, label:"請求書"}) : (q && {href:"#/quotes/"+q.id, label:"見積書"});
+  if(first) return first;
+  if(inv) return {href:"#/invoices/"+inv.id, label:"請求書"};
+  if(q) return {href:"#/quotes/"+q.id, label:"見積書"};
+  return {href:"#/quotes/new?project="+p.id, label:"＋見積書"};
+}
 function projectRowHref(p){
   if(false){
     var q = latestQuoteFor(p.id);
@@ -572,7 +625,7 @@ function renderHome(){
   return ''
   + banner
   + '<div class="page-head"><div><div class="page-title">ホーム</div><div class="page-sub">桜電設の見積・請求のいまが一目でわかります</div></div>'
-  + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn secondary" data-nav-href="#/projects/new">+ 新規案件</button><button class="btn" data-nav-href="#/quotes/new">+ 新規見積書</button><button class="btn" data-nav-href="#/invoices/new">+ 新規請求書</button></div></div>'
+  + '<div class="new-btns"><button class="btn nb-1" data-nav-href="#/projects/new">+ 新規案件</button><button class="btn nb-2" data-nav-href="#/quotes/new">+ 新規見積書</button><button class="btn nb-3" data-nav-href="#/invoices/new">+ 新規請求書</button></div></div>'
   + '<div class="stat-grid">'
     + statCard(counts["見積中"],"見積中","bar-1","#/projects?status="+encodeURIComponent("見積中"))
     + statCard(counts["受注"],"受注","bar-2","#/projects?status="+encodeURIComponent("受注"))
@@ -596,10 +649,18 @@ function renderProjectsList(query){
   return ''
   + '<div class="page-head"><div><div class="page-title">案件</div><div class="page-sub">顧客・現場ごとの案件を管理します</div></div><button class="btn" data-nav-href="#/projects/new">+ 新規案件</button></div>'
   + '<div class="toolbar">'
-    + '<input class="input search-input" id="project-search" placeholder="件名・顧客名・担当者で検索">'
-    + '<select class="input" id="project-status-filter" style="width:auto;"><option value="">すべてのステータス</option>'+STATUSES.map(function(s){return '<option value="'+s+'"'+(s===initialStatus?" selected":"")+'>'+s+'</option>';}).join("")+'</select>'
+    + '<input class="input search-input" id="project-search" placeholder="顧客名・件名で検索">'
+    + '<select class="input" id="project-status-filter" style="width:auto;"><option value="">進行中の案件（終わった案件は非表示）</option>'+STATUSES.map(function(s){return '<option value="'+s+'"'+(s===initialStatus?" selected":"")+'>'+s+'</option>';}).join("")+'</select>'
   + '</div>'
   + '<div id="projects-table-wrap"></div>';
+}
+var OPEN_CUSTOMERS = {};
+function customerKeyOf(p){
+  /* 取引先につながっている案件も、名前だけ同じ案件も、同じ会社としてまとめる（空白の違いは無視） */
+  var nm = String(p.customerName||"").replace(/\s/g,"");
+  if(nm) return "nm:"+nm;
+  var c = customerForProject(p);
+  return c ? "nm:"+String(c.name||"").replace(/\s/g,"") : "none";
 }
 function filterProjects(){
   var term = (qs("#project-search")&&qs("#project-search").value||"").trim().toLowerCase();
@@ -607,20 +668,37 @@ function filterProjects(){
   var list = STATE.projects.filter(function(p){
     var hay = [p.workContent,p.siteName,p.customerName,p.contactPerson,p.address].join(" ").toLowerCase();
     var matchTerm = !term || hay.indexOf(term)>-1;
-    var matchStatus = !statusF || p.status===statusF;
+    /* 絞り込みなしのときは終わった案件（請求済み・入金済み）を隠す。ステータスで選べば見られる */
+    var matchStatus = statusF ? p.status===statusF : (p.status!=="請求済み" && p.status!=="入金済み");
     return matchTerm && matchStatus;
   });
   var wrap = qs("#projects-table-wrap");
   if(!wrap) return;
   if(!list.length){ wrap.innerHTML = '<div class="empty-state">該当する案件がありません。</div>'; return; }
-  wrap.innerHTML = '<table class="list-table"><thead><tr><th>件名</th><th>顧客名</th><th>ステータス</th><th>更新日</th></tr></thead><tbody>'
-    + list.map(function(p){
-      var href = projectRowHref(p);
-      return '<tr data-href="'+href+'"><td><a class="row-link" href="'+href+'">'+esc(firstLine(p.workContent)||p.siteName||"(件名未設定)")+'</a></td>'
-      + '<td>'+esc(p.customerName||"-")+'</td>'
-      + '<td>'+statusBadge(p.status)+'</td>'
-      + '<td>'+fmtDateShort(new Date(p.updatedAt||p.createdAt||Date.now()).toISOString().slice(0,10))+'</td></tr>';
-    }).join("") + '</tbody></table>';
+  /* 顧客ごとにまとめる（新しく更新した顧客が上） */
+  var groups = [], byKey = {};
+  list.forEach(function(p){
+    var k = customerKeyOf(p);
+    if(!byKey[k]){ byKey[k] = { key:k, name:(p.customerName||"").trim() || "（顧客名未設定）", items:[] }; groups.push(byKey[k]); }
+    byKey[k].items.push(p);
+  });
+  var autoOpen = !!(term || statusF);
+  wrap.innerHTML = '<div class="cust-list">' + groups.map(function(g){
+    var open = autoOpen || OPEN_CUSTOMERS[g.key];
+    return '<div class="cust-group'+(open?' open':'')+'">'
+      + '<div class="cust-head"><button type="button" class="cust-row" data-action="toggle-customer" data-key="'+escAttr(g.key)+'" aria-expanded="'+(open?'true':'false')+'">'
+        + '<span class="cust-name">'+esc(g.name)+'</span><span class="cust-count">'+g.items.length+'件</span><span class="chev" aria-hidden="true">▾</span></button>'
+        + '<button type="button" class="cust-edit" data-action="edit-client-list" data-project="'+escAttr(g.items[0].id)+'" aria-label="'+escAttr(g.name)+'の案件先を編集">編集</button></div>'
+      + '<div class="cust-projects">' + g.items.map(function(p){
+          var tg = docTargetFor(p);
+          return '<div class="proj-item"><a class="proj-row" href="'+esc(tg.href)+'"><span class="proj-title">'+esc(firstLine(p.workContent)||p.siteName||"(件名未設定)")+'</span>'
+            + '<span class="proj-doc">'+esc(tg.label)+'</span>'
+            + statusBadge(p.status)
+            + '<span class="proj-date">'+fmtDateShort(new Date(p.updatedAt||p.createdAt||Date.now()).toISOString().slice(0,10))+'</span></a>'
+            + '<button type="button" class="proj-del" data-action="delete-project-list" data-id="'+escAttr(p.id)+'" aria-label="この案件を削除">削除</button></div>';
+        }).join("") + '</div>'
+    + '</div>';
+  }).join("") + '</div>';
 }
 
 /* ---------- customers (取引先) ---------- */
@@ -697,6 +775,80 @@ function applyCustomerToProjectForm(form, c){
   qs("[name=contactInfo]",form).value = ci;
   qs("[name=honorific]",form).value = c.honorific||"御中";
   qs("[name=customerId]",form).value = c.id;
+}
+
+/* ---------- 案件先（宛先）の編集：取引先と同じ入力欄。保存先を2通りから選べる ---------- */
+/* 書類に印字する案件先の情報。「この案件だけに保存」したものがあればそれを優先、なければ取引先の登録内容 */
+function clientInfoFor(project){
+  if(!project) return null;
+  var c = customerForProject(project);
+  if(project.clientOwn){
+    return { own:true, name:project.customerName||"", postalCode:project.postalCode||"", address:project.address||"", contactPerson:project.contactPerson||"" };
+  }
+  if(c) return { own:false, name:c.name||"", postalCode:c.postalCode||"", address:c.address||"", contactPerson:c.contactPerson||"" };
+  if(project.postalCode || project.address || project.contactPerson){
+    return { own:true, name:project.customerName||"", postalCode:project.postalCode||"", address:project.address||"", contactPerson:project.contactPerson||"" };
+  }
+  return null;
+}
+function renderClientForm(project, back){
+  if(!project) return '<div class="empty-state">案件が見つかりません。</div>';
+  var c = customerForProject(project);
+  var useOwn = project.clientOwn || !c;
+  var d = useOwn
+    ? { name:project.customerName||"", honorific:project.honorific||"御中", postalCode:project.postalCode||"", address:project.address||"", contactPerson:project.contactPerson||"", phone:project.clientPhone||(c?c.phone:"")||"", email:project.clientEmail||(c?c.email:"")||"", memo:project.clientMemo||"" }
+    : { name:c.name||project.customerName||"", honorific:c.honorific||project.honorific||"御中", postalCode:c.postalCode||"", address:c.address||"", contactPerson:c.contactPerson||"", phone:c.phone||"", email:c.email||"", memo:c.memo||"" };
+  var backHref = back || ("#/projects/"+project.id);
+  var source = project.clientOwn ? "今はこの案件専用の情報が書類に使われています。" : (c ? "今は取引先「"+esc(c.name||"")+"」の登録内容が書類に使われています。" : "まだ取引先には登録されていません。");
+  return ''
+  + '<div class="page-head"><div><div class="page-title">案件先（宛先）の編集</div><div class="page-sub">'+esc(firstLine(project.workContent)||project.siteName||"")+'</div></div></div>'
+  + '<form class="card" id="client-form" data-project="'+escAttr(project.id)+'" data-back="'+escAttr(backHref)+'">'
+    + '<div class="field-row">'
+      + '<div class="field"><label>取引先名（会社名・お名前）</label><input class="input" name="name" value="'+escAttr(d.name)+'" placeholder="例：株式会社〇〇"></div>'
+      + '<div class="field"><label>敬称</label><select class="input" name="honorific"><option value="御中"'+(d.honorific!=="様"?" selected":"")+'>御中（会社あて）</option><option value="様"'+(d.honorific==="様"?" selected":"")+'>様（個人あて）</option></select></div>'
+    + '</div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>郵便番号</label><input class="input" name="postalCode" value="'+escAttr(d.postalCode)+'" placeholder="123-4567"></div>'
+      + '<div class="field"><label>電話番号</label><input class="input" name="phone" value="'+escAttr(d.phone)+'"></div>'
+    + '</div>'
+    + '<div class="field"><label>住所</label><input class="input" name="address" value="'+escAttr(d.address)+'"></div>'
+    + '<div class="field-row">'
+      + '<div class="field"><label>担当者名</label><input class="input" name="contactPerson" value="'+escAttr(d.contactPerson)+'"></div>'
+      + '<div class="field"><label>メールアドレス</label><input class="input" type="email" name="email" value="'+escAttr(d.email)+'"></div>'
+    + '</div>'
+    + '<div class="field"><label>メモ</label><textarea class="input" name="memo" rows="2">'+esc(d.memo)+'</textarea></div>'
+    + '<div class="page-sub" style="margin:4px 0 0;line-height:1.7;">'+source+'<br>・<b>保存（取引先にも登録）</b>…取引先の登録内容も更新します。この会社の他の案件にも反映されます。<br>・<b>この案件だけに保存</b>…この案件の書類だけに使います。取引先の登録内容は変わりません。</div>'
+    + '<div class="editor-actions">'
+      + '<button type="button" class="btn" data-action="save-client" data-mode="customer">保存（取引先にも登録）</button>'
+      + '<button type="button" class="btn secondary" data-action="save-client" data-mode="project">この案件だけに保存</button>'
+      + '<button type="button" class="btn secondary" data-nav-href="'+escAttr(backHref)+'">戻る</button>'
+    + '</div>'
+  + '</form>';
+}
+function saveClient(form, mode){
+  if(!form) return;
+  var pid = form.dataset.project, back = form.dataset.back || "#/projects";
+  var project = findById(STATE.projects, pid);
+  if(!project){ toast("案件が見つかりません"); return; }
+  var v = {};
+  ["name","honorific","postalCode","address","contactPerson","phone","email","memo"].forEach(function(f){ var el = qs("[name="+f+"]", form); v[f] = el ? el.value.trim() : ""; });
+  if(!v.name){ toast("取引先名を入力してください"); return; }
+  var projData = { customerName:v.name, honorific:v.honorific, postalCode:v.postalCode, address:v.address, contactPerson:v.contactPerson,
+    contactInfo:[v.phone,v.email].filter(Boolean).join(" / "), clientPhone:v.phone, clientEmail:v.email, clientMemo:v.memo };
+  qsa("button[data-action=save-client]", form).forEach(function(b){ b.disabled = true; });
+  var done = function(msg){ toast(msg); go(back); };
+  var fail = function(){ qsa("button[data-action=save-client]", form).forEach(function(b){ b.disabled = false; }); toast("保存できませんでした。もう一度押してください"); };
+  if(mode === "customer"){
+    var c = customerForProject(project);
+    var custData = { name:v.name, honorific:v.honorific, postalCode:v.postalCode, address:v.address, contactPerson:v.contactPerson, phone:v.phone, email:v.email, memo:v.memo };
+    saveDoc("customers", c ? c.id : null, custData).then(function(cid){
+      projData.customerId = cid; projData.clientOwn = false;
+      return saveDoc("projects", pid, projData);
+    }).then(function(){ done(c ? "取引先と案件先の情報を保存しました" : "取引先に登録して保存しました"); }).catch(fail);
+  } else {
+    projData.clientOwn = true;
+    saveDoc("projects", pid, projData).then(function(){ done("この案件の案件先情報を保存しました"); }).catch(fail);
+  }
 }
 
 /* ---------- project form ---------- */
@@ -930,14 +1082,13 @@ function renderDocEditor(kind, doc, query){
 
   var quotePickerHtml = "";
   if(!isQuote){
-    var relatedQuotes = projectId ? STATE.quotes.filter(function(q){return q.projectId===projectId;}) : [];
-    quotePickerHtml = '<div class="field"><label>元になった見積書（任意）</label><select class="input" name="quoteId" id="quote-picker">'
-      + '<option value="">選択しない</option>'
-      + relatedQuotes.map(function(q){return '<option value="'+q.id+'"'+(q.id===linkedQuoteId?" selected":"")+'>'+esc(q.number)+'（'+fmtDateShort(q.issueDate)+'　'+yen(docTotal(q.items))+'）</option>';}).join("")
-      + '</select></div>';
+    /* 「元になった見積書」の欄は非表示。見積書から作ったときのつながりだけ裏で保持する */
+    quotePickerHtml = '<input type="hidden" name="quoteId" value="'+escAttr(linkedQuoteId||"")+'">';
   }
 
-  var deleteBtn = isNew ? "" : '<button type="button" class="btn danger" data-action="delete-'+kind+'" data-id="'+d.id+'">削除</button>';
+  var deleteBtn = isNew ? "" : '<button type="button" class="btn danger del-btn" data-action="delete-'+kind+'" data-id="'+d.id+'">削除</button>';
+  var subjProj = findById(STATE.projects, projectId) || STATE.projects[0];
+  var subjectInit = (subjProj && subjProj.workContent) || "";
   var quoteProj = (isQuote && !isNew) ? findById(STATE.projects, d.projectId) : null;
   var orderBtn = (quoteProj && (quoteProj.status==="見積中" || !quoteProj.status)) ? '<button type="button" class="btn" data-action="mark-ordered" data-project="'+esc(d.projectId)+'">受注にする</button>' : "";
   var makeInvoiceBtn = (isQuote && !isNew) ? '<button type="button" class="btn secondary" data-nav-href="#/invoices/new?project='+d.projectId+'&quote='+d.id+'">この見積書から請求書を作成</button>' : "";
@@ -948,11 +1099,13 @@ function renderDocEditor(kind, doc, query){
   + '<div class="editor-grid doc-editor" data-kind="'+kind+'">'
     + '<form id="'+kind+'-form" data-id="'+(isNew?"":d.id)+'" data-number="'+esc(d?d.number:"")+'">'
       + '<div class="card">'
-        + '<div class="field"><label>案件</label><select class="input" name="projectId" id="project-picker">'+projectOptions+'</select>'
-          + '<div style="margin-top:6px;"><a id="project-detail-link" href="#/projects/'+esc(projectId)+'" style="font-size:12.5px;">案件の詳細・工事内容を編集 →</a></div></div>'
+        + (projectId
+            ? '<input type="hidden" name="projectId" value="'+escAttr(projectId)+'">'
+            : '<div class="field"><label>案件を選ぶ</label><select class="input" name="projectId" id="project-picker">'+projectOptions+'</select></div>')
+        + '<div class="field"><button type="button" class="btn secondary client-btn" data-action="edit-client">案件先（宛先）を編集 ›</button></div>'
         + quotePickerHtml
-        + '<div class="field"><label>件名</label><div class="input" id="subject-display" style="background:var(--paper);min-height:22px;white-space:pre-wrap;line-height:1.5;"></div>'
-          + '<div class="page-sub" style="margin-top:5px;">案件の「工事内容」がそのまま件名になります。内容を変えたい場合は案件ページで工事内容を編集してください。</div></div>'
+        + '<div class="field"><label>件名</label><textarea class="input" name="subject" rows="2" placeholder="例：B棟実験室コンセント増設工事">'+esc(subjectInit)+'</textarea>'
+          + '<div class="page-sub" style="margin-top:5px;">保存すると、この案件の件名として記録されます（同じ案件の他の書類にも反映）。</div></div>'
         + '<div class="field"><label>宛名の下に表示する（登録した取引先の情報から）</label><div class="tgl-row">'
           + '<label class="tgl"><input type="checkbox" id="'+kind+'-show-address" name="showAddress"'+((d&&d.showAddress)?" checked":"")+'> 住所</label>'
           + '<label class="tgl"><input type="checkbox" id="'+kind+'-show-contact" name="showContact"'+((d&&d.showContact)?" checked":"")+'> 担当者</label>'
@@ -1148,7 +1301,8 @@ function updatePreview(kind, form){
   var projectId = qs("[name=projectId]",form).value;
   var project = findById(STATE.projects, projectId);
   var number = form.dataset.number || "(保存時に採番されます)";
-  var subject = (project && project.workContent) || "";
+  var subjEl = qs("[name=subject]", form);
+  var subject = subjEl ? subjEl.value : ((project && project.workContent) || "");
   var issueDate = qs("[name=issueDate]",form).value;
   var secondaryDate = qs("[name=secondaryDate]",form).value;
   var notes = qs("[name=notes]",form).value;
@@ -1177,7 +1331,7 @@ function updatePreview(kind, form){
   function fillerRow(){ return '<tr'+zr()+'><td></td><td></td><td></td><td></td></tr>'; }
 
   var hasContact = project && project.contactPerson;
-  var cust = customerForProject(project);
+  var cust = clientInfoFor(project);
   var showAddr = !!(qs("[name=showAddress]",form)||{}).checked;
   var showCont = !!(qs("[name=showContact]",form)||{}).checked;
   var contactName = (showCont && cust && cust.contactPerson) ? String(cust.contactPerson).replace(/\s*(様|さま|殿)\s*$/,"") : "";
@@ -1192,12 +1346,12 @@ function updatePreview(kind, form){
   var hintEl = qs("#cust-hint", form);
   if(hintEl){
     if(!project) hintEl.textContent = "";
-    else if(!cust) hintEl.textContent = "この案件には取引先がつながっていません。案件画面の「登録済みの取引先から選ぶ」で選ぶと使えます。";
+    else if(!cust) hintEl.textContent = "案件先の住所・担当者が登録されていません。「案件先（宛先）を編集」から入力できます。";
     else {
       var miss = [];
       if(showAddr && !cust.address) miss.push("住所");
       if(showCont && !cust.contactPerson) miss.push("担当者名");
-      hintEl.textContent = "取引先「"+(cust.name||"")+"」の情報を使います。" + (miss.length ? "（取引先に"+miss.join("・")+"が登録されていません）" : "");
+      hintEl.textContent = (cust.own ? "この案件専用の案件先情報を使います。" : "取引先「"+(cust.name||"")+"」の情報を使います。") + (miss.length ? "（"+miss.join("・")+"が未入力です。「案件先（宛先）を編集」から入力できます）" : "");
     }
   }
 
@@ -1291,6 +1445,11 @@ function saveCurrentDoc(kind, form){
   if(isQuote){ data.validUntil = qs("[name=secondaryDate]",form).value; }
   else { data.dueDate = qs("[name=secondaryDate]",form).value; var qp=qs("[name=quoteId]",form); data.quoteId = qp?qp.value:""; }
 
+  var subjEl = qs("[name=subject]", form);
+  var projNow = findById(STATE.projects, projectId);
+  if(subjEl && projNow && subjEl.value.trim() !== String(projNow.workContent||"").trim()){
+    saveDoc("projects", projectId, {workContent: subjEl.value.trim()}).catch(function(){});
+  }
   var numberPromise = data.number ? Promise.resolve(data.number) : nextNumber(kind);
   numberPromise.then(function(number){
     data.number = number;
@@ -1308,9 +1467,16 @@ function saveCurrentDoc(kind, form){
     });
   });
 }
-function deleteCurrentDoc(kind,id){
+function armButton(btn, armedText, ms){
+  /* 1回目のタップでは確認表示にするだけ。数秒以内にもう一度押したら実行 */
+  if(btn.dataset.armed){ return true; }
+  btn.dataset.armed = "1"; btn.dataset.orig = btn.textContent; btn.textContent = armedText; btn.classList.add("armed");
+  setTimeout(function(){ if(btn && btn.dataset.armed){ delete btn.dataset.armed; btn.textContent = btn.dataset.orig; btn.classList.remove("armed"); } }, ms||4000);
+  return false;
+}
+function deleteCurrentDoc(kind,id,btn){
   var label = kind==="quote"?"見積書":"請求書";
-  if(!confirm("この"+label+"を削除しますか？")) return;
+  if(btn && !armButton(btn, "本当に削除する？もう一度押すと削除")) return;
   deleteDoc(kind==="quote"?"quotes":"invoices", id).then(function(){ toast(label+"を削除しました"); go("#/"+(kind==="quote"?"quotes":"invoices")); });
 }
 
@@ -1682,10 +1848,30 @@ document.addEventListener("click", function(e){
     row.remove();
     updatePreview(scope2.dataset.kind, qs("form",scope2));
   } else if(action==="delete-project"){ deleteProject(actionEl.dataset.id); }
-  else if(action==="delete-quote"){ deleteCurrentDoc("quote", actionEl.dataset.id); }
-  else if(action==="delete-invoice"){ deleteCurrentDoc("invoice", actionEl.dataset.id); }
+  else if(action==="delete-quote"){ deleteCurrentDoc("quote", actionEl.dataset.id, actionEl); }
+  else if(action==="delete-invoice"){ deleteCurrentDoc("invoice", actionEl.dataset.id, actionEl); }
   else if(action==="print-doc"){ printCurrentDoc(actionEl.dataset.kind); }
   else if(action==="backup"){ runBackup(actionEl); }
+  else if(action==="edit-client"){
+    var edScope = actionEl.closest(".doc-editor");
+    var edForm = edScope ? qs("form", edScope) : null;
+    var pid = edForm ? (qs("[name=projectId]", edForm)||{}).value : "";
+    if(!pid){ toast("先に案件を選んでください"); return; }
+    if(edScope && edScope.dataset.dirty && !armButton(actionEl, "未保存の変更が消えます。もう一度押すと移動", 5000)){ toast("残したい場合は、先に下の「保存する」を押してください"); return; }
+    go("#/clients/"+pid+"?back="+encodeURIComponent(location.hash));
+  }
+  else if(action==="save-client"){ saveClient(actionEl.closest("form"), actionEl.dataset.mode); }
+  else if(action==="delete-project-list"){
+    if(!armButton(actionEl, "もう一度押すと削除")) return;
+    actionEl.disabled = true;
+    deleteDoc("projects", actionEl.dataset.id).then(function(){ toast("案件を削除しました（見積書・請求書は残っています）"); })
+      .catch(function(){ actionEl.disabled = false; toast("削除できませんでした。もう一度押してください"); });
+  }
+  else if(action==="edit-client-list"){ go("#/clients/"+actionEl.dataset.project+"?back="+encodeURIComponent(location.hash||"#/projects")); }
+  else if(action==="toggle-customer"){
+    var grp = actionEl.closest(".cust-group");
+    if(grp){ var op = !grp.classList.contains("open"); grp.classList.toggle("open", op); actionEl.setAttribute("aria-expanded", op?"true":"false"); OPEN_CUSTOMERS[actionEl.dataset.key] = op; }
+  }
   else if(action==="delete-customer"){ deleteCustomer(actionEl); }
   else if(action==="save-as-customer"){
     var pf = actionEl.closest("form");
@@ -1714,7 +1900,7 @@ document.addEventListener("click", function(e){
 
 document.addEventListener("input", function(e){
   var scope = e.target.closest(".doc-editor");
-  if(scope){ updatePreview(scope.dataset.kind, qs("form",scope)); return; }
+  if(scope){ scope.dataset.dirty = "1"; updatePreview(scope.dataset.kind, qs("form",scope)); return; }
   if(e.target.id==="project-search" || e.target.id==="project-status-filter") filterProjects();
   if(e.target.id==="doc-search-quote") filterDocs("quote");
   if(e.target.id==="doc-search-invoice") filterDocs("invoice");
