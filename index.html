@@ -1426,11 +1426,12 @@ function updatePreview(kind, form){
   if(detailLink){ detailLink.href = project ? "#/projects/"+project.id : "#/projects"; }
 }
 
-function saveCurrentDoc(kind, form){
+function saveCurrentDoc(kind, form, opts){
+  opts = opts || {};
   var projectId = qs("[name=projectId]",form).value;
-  if(!projectId){ toast("案件を選択してください"); return; }
+  if(!projectId){ toast("案件を選択してください"); return null; }
   var items = collectItems(form).filter(function(it){ return it.name || it.qty || it.price; });
-  if(!items.length){ toast("明細を1件以上入力してください"); return; }
+  if(!items.length){ toast("明細を1件以上入力してください"); return null; }
   var isQuote = kind==="quote";
   var id = form.dataset.id || null;
   var data = {
@@ -1451,19 +1452,30 @@ function saveCurrentDoc(kind, form){
     saveDoc("projects", projectId, {workContent: subjEl.value.trim()}).catch(function(){});
   }
   var numberPromise = data.number ? Promise.resolve(data.number) : nextNumber(kind);
-  numberPromise.then(function(number){
+  return numberPromise.then(function(number){
     data.number = number;
-    saveDoc(isQuote?"quotes":"invoices", id, data).then(function(newId){
-      toast((isQuote?"見積書":"請求書")+"を保存しました");
+    return saveDoc(isQuote?"quotes":"invoices", id, data).then(function(newId){
+      if(!opts.stay) toast((isQuote?"見積書":"請求書")+"を保存しました");
+      var st = null;
       if(!isQuote){
         var proj = findById(STATE.projects, projectId);
         var savedInv = findById(STATE.invoices, newId);
-        if(proj && proj.status!=="入金済み" && !(savedInv && savedInv.exportedAt)){ saveDoc("projects", projectId, {status:"請求前"}); }
+        if(proj && proj.status!=="入金済み" && !(savedInv && savedInv.exportedAt)){ st = saveDoc("projects", projectId, {status:"請求前"}); }
       } else {
         var proj2 = findById(STATE.projects, projectId);
-        if(proj2 && !proj2.status){ saveDoc("projects", projectId, {status:"見積中"}); }
+        if(proj2 && !proj2.status){ st = saveDoc("projects", projectId, {status:"見積中"}); }
       }
-      go("#/"+(isQuote?"quotes":"invoices")+"/"+newId);
+      var hash = "#/"+(isQuote?"quotes":"invoices")+"/"+newId;
+      if(opts.stay){
+        /* 画面はそのままにして、保存済みの書類として扱う（PDF出力のときの自動保存） */
+        form.dataset.id = newId; form.dataset.number = number;
+        var scope = form.closest(".doc-editor"); if(scope) delete scope.dataset.dirty;
+        try { history.replaceState(null, "", hash); } catch(e){}
+        var t = qs(".page-title"); if(t) t.textContent = (isQuote?"見積書 ":"請求書 ") + number;
+        return Promise.resolve(st).catch(function(){}).then(function(){ return newId; });
+      }
+      go(hash);
+      return newId;
     });
   });
 }
@@ -1483,17 +1495,23 @@ function deleteCurrentDoc(kind,id,btn){
 function printCurrentDoc(kind){
   var scope = qs('.doc-editor[data-kind="'+kind+'"]');
   var form = scope ? qs("#"+kind+"-form", scope) : null;
-  if(form) updatePreview(kind, form);
   var target = qs("#print-target");
-  if(!target) return;
+  if(!target || !form) return;
   if(PDF_BUSY) return;
+  /* PDF出力の前に、書類を自動で保存する（番号もここで決まり、PDFに印字される） */
+  var saving = saveCurrentDoc(kind, form, {stay:true});
+  if(!saving) return;
   PDF_BUSY = true;
   var prefix = kind==="quote" ? "見積書" : "請求書";
-  var num = form ? form.dataset.number : "";
-  var filename = prefix + (num ? "_"+num : "") + ".pdf";
-  toast("PDFを作成中…");
+  var filename = "";
+  toast("保存してPDFを作成中…");
   var fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-  Promise.all([loadPdfLibs(), fontsReady]).then(function(){
+  saving.then(function(){
+    updatePreview(kind, form);
+    var num = form.dataset.number || "";
+    filename = prefix + (num ? "_"+num : "") + ".pdf";
+    return Promise.all([loadPdfLibs(), fontsReady]);
+  }).then(function(){
     return buildPdfBlob(target);
   }).then(function(blob){
     return claude.use("downloads").then(function(downloads){
@@ -1804,7 +1822,68 @@ function renderSettings(){
     + '<div class="page-sub" style="margin:0 0 12px;line-height:1.7;">押すと2つのファイルを続けて保存します。<br>①「桜電設_バックアップ_日付.html」…今のデータ全部。パソコンならダブルクリックでそのまま非常用アプリとして開けます。iCloud Drive・Googleドライブ・USBなどにしまっておいてください。<br>②「index.html」…データの入っていない最新のアプリ本体。GitHubに上げておくと、iPhoneのSafariでも開けて、①を読み込めば同じように使えます。</div>'
     + '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><button type="button" class="btn" data-action="backup">今すぐバックアップ</button>'
     + '<span class="page-sub" style="margin:0;">最終バックアップ：'+(s.lastBackupAt ? fmtDate(new Date(s.lastBackupAt - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)) : 'まだありません')+'</span></div>'
+  + '</div>'
+  + '<div class="card" style="margin-top:20px;">'
+    + '<h3 style="margin:0 0 8px;font-size:15px;">バックアップを読み込む</h3>'
+    + '<div class="page-sub" style="margin:0 0 12px;line-height:1.7;">GitHub版や別の端末で作った書類を、このアプリに取り込みます。「桜電設_バックアップ_日付.html」を選んでください。<br>・バックアップにしかない書類 → 追加<br>・両方にある書類 → 更新日時が新しいほうを残す<br>・このアプリにしかない書類 → そのまま（消えません）</div>'
+    + '<label class="btn secondary" style="cursor:pointer;">バックアップを読み込む<input type="file" id="import-backup-input" accept=".html,.htm,.json,text/html,application/json" style="display:none;"></label>'
   + '</div>';
+}
+/* ---------- バックアップの取り込み（足す＋新しい方を優先） ---------- */
+var IMPORT_BUSY = false;
+function parseBackupText(text){
+  text = String(text||"").trim();
+  var obj;
+  if(text.charAt(0) === "{") obj = JSON.parse(text);
+  else {
+    var m = text.match(/<script type="application\/json" id="sakura-data">([\s\S]*?)<\/script>/);
+    if(!m) throw new Error("no data");
+    obj = JSON.parse(m[1]);
+  }
+  if(!obj || obj.format !== "sakura-densetsu-backup" || !obj.docs) throw new Error("bad format");
+  return obj;
+}
+function importBackupFile(file){
+  if(!file || IMPORT_BUSY) return;
+  if(!STATE.ready || !db){ toast("データの読み込み中です。少し待ってからもう一度選んでください"); return; }
+  var r = new FileReader();
+  r.onload = function(){
+    var obj;
+    try { obj = parseBackupText(r.result); }
+    catch(e){ toast("バックアップファイルとして読み込めませんでした。「桜電設_バックアップ_〜.html」を選んでください"); return; }
+    IMPORT_BUSY = true;
+    toast("読み込み中…");
+    var added = 0, updated = 0, kept = 0, tasks = [];
+    var cols = {projects:1, customers:1, quotes:1, invoices:1};
+    Object.keys(obj.docs).forEach(function(path){
+      var parts = path.split("/");
+      if(parts.length !== 2) return;
+      var col = parts[0], id = parts[1], data = obj.docs[path];
+      if(!data || typeof data !== "object") return;
+      if(path === "settings/company"){
+        var cur = STATE.settings || {};
+        var merged = Object.assign({}, data, cur);
+        /* 番号がかぶらないように、通し番号は大きいほうを使う */
+        merged.quoteSeq = Math.max(Number(cur.quoteSeq)||0, Number(data.quoteSeq)||0);
+        merged.invoiceSeq = Math.max(Number(cur.invoiceSeq)||0, Number(data.invoiceSeq)||0);
+        tasks.push(function(){ return db.doc("settings/company").set(merged); });
+        return;
+      }
+      if(!cols[col] || !/^[A-Za-z0-9_\-]+$/.test(id)) return;
+      var existing = findById(STATE[col]||[], id);
+      if(!existing){ added++; tasks.push(function(){ return db.doc(col+"/"+id).set(data); }); }
+      else if((Number(data.updatedAt)||0) > (Number(existing.updatedAt)||0)){ updated++; tasks.push(function(){ return db.doc(col+"/"+id).set(data); }); }
+      else kept++;
+    });
+    var chain = Promise.resolve(), failed = 0;
+    tasks.forEach(function(t){ chain = chain.then(function(){ return t().catch(function(){ failed++; }); }); });
+    chain.then(function(){
+      IMPORT_BUSY = false;
+      toast("読み込み完了：追加 "+added+"件・更新 "+updated+"件・そのまま "+kept+"件" + (failed ? "（"+failed+"件は失敗）" : ""));
+    });
+  };
+  r.onerror = function(){ toast("ファイルを読み込めませんでした"); };
+  r.readAsText(file);
 }
 function saveSettings(form){
   var data = {};
@@ -1907,6 +1986,7 @@ document.addEventListener("input", function(e){
 });
 
 document.addEventListener("change", function(e){
+  if(e.target.id==="import-backup-input"){ var f = e.target.files && e.target.files[0]; e.target.value = ""; importBackupFile(f); return; }
   if(e.target.id==="quote-picker"){
     var qid = e.target.value;
     var form = e.target.closest("form");
